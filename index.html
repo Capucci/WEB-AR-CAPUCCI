@@ -2,10 +2,11 @@
 <html>
 <head>
   <script>
-const VERSION = "1.9.5"; 
+const VERSION = "1.9.6"; 
 // ↑ SEMPRE que atualizar modelo ou target,
 // só mude esse número
 </script>
+ 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
@@ -62,14 +63,15 @@ button {
 
   </a-entity>
 
-</a-scene>
-
-<script>
-function playAudio(){
-  document.querySelector('#audioMascote')
-          .components.sound.playSound();
+<a-scene
+  embedded
+  start-audio
+  mindar-image="imageTargetSrc: TargetBalboa.mind;"
+  vr-mode-ui="enabled: false"
+  device-orientation-permission-ui="enabled: false">
 }
 </script>
 
 </body>
 </html>
+
