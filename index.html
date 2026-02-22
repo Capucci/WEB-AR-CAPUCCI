@@ -65,11 +65,16 @@ button {
 </a-scene>
 
 <script>
-function playAudio(){
-  document.querySelector('#audioMascote')
-          .components.sound.playSound();
-}
+AFRAME.registerComponent('auto-start', {
+  init: function () {
+    this.el.addEventListener('targetFound', () => {
+      document.querySelector('#audioMascote')
+              .components.sound.playSound();
+    });
+  }
+});
 </script>
 
 </body>
 </html>
+
