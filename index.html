@@ -7,19 +7,12 @@ dotatico<!DOCTYPE html>
 </head>
   
   <script>
-const VERSION = "1.9.3"; 
+const VERSION = "1.9.4"; 
 // ↑ SEMPRE que atualizar modelo ou target,
 // só mude esse número
 </script>
 
 <body>
-
-  <a-sound
-  src="url(AudioTrack11.mp3)"
-  autoplay="true"
-  loop="false"
-  position="0 0 0">
-</a-sound>
 
 <a-scene
   mindar-image="imageTargetSrc: TargetBalboa.mind;"
@@ -30,13 +23,19 @@ const VERSION = "1.9.3";
 
   <a-entity mindar-image-target="targetIndex: 0">
 
-  <a-entity
+ <a-entity
   id="mascote"
   gltf-model="MascoteMana.glb"
-  animation-mixer="clip: Take 001; loop: repeat"
+  animation-mixer="loop: repeat"
   position="0 0 0.3"
   rotation="-90 0 0"
   scale="0.7 0.7 0.7">
+</a-entity>
+
+<!-- AUDIO -->
+<a-entity
+  id="audioMascote"
+  sound="src: url(AudioTrack11.mp3); autoplay: false; loop: true; volume: 1">
 </a-entity>
 
 </a-entity>
@@ -46,6 +45,7 @@ const VERSION = "1.9.3";
 
 </body>
 </html>
+
 
 
 
