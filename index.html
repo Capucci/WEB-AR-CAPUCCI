@@ -2,7 +2,7 @@
 <html>
 <head>
    <script>
-const VERSION = "4.3.0"; 
+const VERSION = "4.4.0"; 
 // ↑ SEMPRE que atualizar modelo ou target,
 // só mude esse número
 </script>
@@ -32,9 +32,6 @@ button {
 
 <body>
 
-<!-- BOTÃO PARA ATIVAR SOM -->
-<button onclick="playAudio()">Ativar Som</button>
-
 <a-scene
   mindar-image="imageTargetSrc: TargetBalboa.mind;"
   vr-mode-ui="enabled: false"
@@ -54,16 +51,6 @@ button {
       scale="0.7 0.7 0.7">
     </a-entity>
 
-    <!-- AUDIO -->
-    <a-entity
-      id="audioMascote"
-      sound="src: url(AudioTrack11.mp3); autoplay: false; loop: true; volume: 1">
-    </a-entity>
-
-  </a-entity>
-
-</a-scene>
-
 <script>
 AFRAME.registerComponent('auto-start', {
   init: function () {
@@ -77,6 +64,7 @@ AFRAME.registerComponent('auto-start', {
 
 </body>
 </html>
+
 
 
 
