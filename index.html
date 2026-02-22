@@ -2,7 +2,7 @@
 <html>
 <head>
    <script>
-const VERSION = "4.9.6"; 
+const VERSION = "4.9.7"; 
 // ↑ SEMPRE que atualizar modelo ou target,
 // só mude esse número
 </script>
@@ -50,7 +50,7 @@ body { margin:0; overflow:hidden; }
   transform: scale(1.1);
 }
 
-/* Botão de VR (mantém no canto inferior direito) */
+/* Botão de VR no canto inferior direito */
 .a-enter-vr {
   position: fixed;
   bottom: 20px !important;
@@ -104,7 +104,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let audioUnlocked = false;
   let audioPausedTime = 0;
   let isAudioPlaying = false;
-  let wasTargetVisible = false;
+  let firstTargetFound = false; // Nova variável para controlar primeira vez
   
   // Criar botão de controle simplificado
   const audioBtn = document.createElement('button');
@@ -126,39 +126,24 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // 🔓 Desbloqueia o áudio no primeiro toque/interação
-  function unlockAudio() {
+  // Função para tentar tocar áudio
+  function tryPlayAudio() {
     if (!audioUnlocked) {
+      // Tenta desbloquear e tocar
       audioElement.play()
         .then(() => {
-          audioElement.pause();
-          audioElement.currentTime = 0;
           audioUnlocked = true;
-          console.log('Áudio desbloqueado com sucesso!');
+          isAudioPlaying = true;
+          console.log('Áudio desbloqueado e tocando!');
+          updateButtonIcon();
         })
         .catch(error => {
-          console.log('Aguardando interação do usuário...', error);
+          console.log('Não foi possível tocar áudio automaticamente:', error);
+          // Se falhou, aguarda interação do usuário
+          audioUnlocked = false;
         });
-    }
-  }
-
-  // Tentar desbloquear em várias interações
-  document.body.addEventListener("click", unlockAudio);
-  document.body.addEventListener("touchstart", unlockAudio);
-  
-  // Tentar também quando a cena carregar
-  document.querySelector('a-scene').addEventListener('loaded', function() {
-    console.log('Cena carregada, preparando áudio...');
-    unlockAudio();
-  });
-
-  // ▶ Quando reconhecer o target
-  target.addEventListener("targetFound", () => {
-    console.log('Target encontrado!');
-    wasTargetVisible = true;
-    
-    // Tocar áudio automaticamente de onde parou
-    if (audioUnlocked && !isAudioPlaying) {
+    } else if (!isAudioPlaying) {
+      // Se já está desbloqueado mas pausado, toca de onde parou
       if (audioPausedTime > 0) {
         audioElement.currentTime = audioPausedTime;
       }
@@ -166,13 +151,24 @@ document.addEventListener("DOMContentLoaded", function () {
       audioElement.play()
         .then(() => {
           isAudioPlaying = true;
-          console.log('Áudio tocando automaticamente, tempo:', audioElement.currentTime);
+          console.log('Áudio tocando, tempo:', audioElement.currentTime);
           updateButtonIcon();
         })
         .catch(error => {
           console.error('Erro ao tocar áudio:', error);
         });
     }
+  }
+
+  // ▶ Quando reconhecer o target
+  target.addEventListener("targetFound", () => {
+    console.log('Target encontrado!');
+    
+    // Marca que o target foi encontrado
+    firstTargetFound = true;
+    
+    // Tenta tocar o áudio automaticamente
+    tryPlayAudio();
   });
 
   // ⏹ Quando perder o target
@@ -190,10 +186,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Botão para controle manual (toggle)
   audioBtn.addEventListener('click', function() {
-    if (!audioUnlocked) {
-      unlockAudio();
-    }
-    
     if (isAudioPlaying) {
       // Se estiver tocando, pausa
       audioPausedTime = audioElement.currentTime;
@@ -208,6 +200,7 @@ document.addEventListener("DOMContentLoaded", function () {
       audioElement.play()
         .then(() => {
           isAudioPlaying = true;
+          audioUnlocked = true; // Marca como desbloqueado
           console.log('Áudio tocando manualmente');
         })
         .catch(error => console.error('Erro:', error));
@@ -229,6 +222,23 @@ document.addEventListener("DOMContentLoaded", function () {
     updateButtonIcon();
     console.log('Áudio terminou');
   });
+
+  // Também tenta tocar quando qualquer interação ocorrer na tela
+  // Isso ajuda a desbloquear o áudio mais rápido
+  document.body.addEventListener('click', function() {
+    if (firstTargetFound && !audioUnlocked) {
+      tryPlayAudio();
+    }
+  });
+  
+  document.body.addEventListener('touchstart', function() {
+    if (firstTargetFound && !audioUnlocked) {
+      tryPlayAudio();
+    }
+  });
+
+  // Pré-carrega o áudio
+  audioElement.load();
 
 });
 </script>
