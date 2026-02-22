@@ -2,7 +2,7 @@
 <html>
 <head>
    <script>
-const VERSION = "4.7.0"; 
+const VERSION = "4.8.0"; 
 // ↑ SEMPRE que atualizar modelo ou target,
 // só mude esse número
 </script>
@@ -51,29 +51,46 @@ button {
       scale="0.7 0.7 0.7">
     </a-entity>
 
-     let audioUnlocked = false;
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
 
-document.body.addEventListener("click", function unlock() {
-  audio.play();
-  audio.pause();
-  audio.currentTime = 0;
-  audioUnlocked = true;
-  document.body.removeEventListener("click", unlock);
-});
+  const target = document.querySelector('[mindar-image-target]');
+  const audio = document.querySelector('#audioMascote');
 
-target.addEventListener("targetFound", () => {
-  if (audioUnlocked) {
-    audio.play();
-  }
-});
+  let audioUnlocked = false;
 
-target.addEventListener("targetLost", () => {
-  audio.pause();
-  audio.currentTime = 0;
+  // 🔓 Desbloqueia o áudio no primeiro toque
+  document.body.addEventListener("click", function unlock() {
+
+    if (audio.components.sound) {
+      audio.components.sound.playSound();
+      audio.components.sound.stopSound();
+      audioUnlocked = true;
+    }
+
+    document.body.removeEventListener("click", unlock);
+  });
+
+  // ▶ Quando reconhecer o target
+  target.addEventListener("targetFound", () => {
+    if (audioUnlocked && audio.components.sound) {
+      audio.components.sound.playSound();
+    }
+  });
+
+  // ⏹ Quando perder o target
+  target.addEventListener("targetLost", () => {
+    if (audio.components.sound) {
+      audio.components.sound.stopSound();
+    }
+  });
+
 });
+</script>
 
 </body>
 </html>
+
 
 
 
