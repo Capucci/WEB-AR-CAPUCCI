@@ -3,8 +3,8 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <script>
-const VERSION = "2.0.0"; 
+<script>
+const VERSION = "2.1.0"; 
 // ↑ SEMPRE que atualizar modelo ou target,
 // só mude esse número
 </script>
@@ -66,13 +66,26 @@ AFRAME.registerComponent('target-events', {
   init: function () {
 
     const audio = document.querySelector('#audioMascote');
+    let audioUnlocked = false;
 
-    this.el.addEventListener('targetFound', () => {
+    // 🔓 Desbloqueia áudio no primeiro toque da tela
+    document.body.addEventListener('click', function unlock() {
       if(audio && audio.components.sound){
+        audio.components.sound.playSound();
+        audio.components.sound.stopSound();
+        audioUnlocked = true;
+      }
+      document.body.removeEventListener('click', unlock);
+    });
+
+    // ▶ Quando reconhecer o target
+    this.el.addEventListener('targetFound', () => {
+      if(audioUnlocked && audio && audio.components.sound){
         audio.components.sound.playSound();
       }
     });
 
+    // ⏹ Quando perder o target
     this.el.addEventListener('targetLost', () => {
       if(audio && audio.components.sound){
         audio.components.sound.stopSound();
@@ -85,4 +98,3 @@ AFRAME.registerComponent('target-events', {
 
 </body>
 </html>
-
