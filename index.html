@@ -2,7 +2,7 @@
 <html>
 <head>
    <script>
-const VERSION = "4.9.3"; 
+const VERSION = "4.9.6"; 
 // ↑ SEMPRE que atualizar modelo ou target,
 // só mude esse número
 </script>
@@ -18,45 +18,46 @@ const VERSION = "4.9.3";
 <style>
 body { margin:0; overflow:hidden; }
 
-/* Botão no canto superior direito */
+/* Botão simplificado no canto inferior esquerdo */
 .audio-control-btn {
   position: fixed;
   bottom: 20px;
   left: 20px;
-  padding: 12px 20px;
-  font-size: 16px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
   z-index: 9999;
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
-  border: 2px solid white;
-  border-radius: 30px;
   cursor: pointer;
-  font-weight: bold;
+  border: 2px solid white;
   box-shadow: 0 4px 8px rgba(0,0,0,0.3);
   transition: all 0.3s ease;
-}
-
-.audio-control-btn:hover {
-  background-color: rgba(50, 50, 50, 0.9);
-  transform: scale(1.05);
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.7);
 }
 
 .audio-control-btn.playing {
-  background-color: rgba(0, 128, 0, 0.7);
+  background-color: rgba(0, 128, 0, 0.8);
 }
 
 .audio-control-btn.paused {
-  background-color: rgba(255, 0, 0, 0.7);
+  background-color: rgba(255, 0, 0, 0.8);
 }
 
-/* Botão de VR (mantém o padrão) */
+.audio-control-btn:hover {
+  transform: scale(1.1);
+}
+
+/* Botão de VR (mantém no canto inferior direito) */
 .a-enter-vr {
   position: fixed;
   bottom: 20px !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  right: auto !important;
+  right: 20px !important;
+  left: auto !important;
   top: auto !important;
+  transform: none !important;
 }
 </style>
 
@@ -85,7 +86,7 @@ body { margin:0; overflow:hidden; }
 
   </a-entity>
 
-  <!-- Elemento de áudio HTML5 escondido (mais confiável para controle) -->
+  <!-- Elemento de áudio HTML5 escondido -->
   <audio id="audioMascote" preload="auto" style="display: none;" loop="false">
     <source src="AudioTrack11.mp3" type="audio/mpeg">
     <!-- Substitua "sua-musica.mp3" pelo caminho correto do seu arquivo -->
@@ -105,26 +106,35 @@ document.addEventListener("DOMContentLoaded", function () {
   let isAudioPlaying = false;
   let wasTargetVisible = false;
   
-  // Verificar se o áudio foi carregado corretamente
-  audioElement.addEventListener('loadedmetadata', function() {
-    console.log('Áudio carregado, duração:', audioElement.duration);
-  });
+  // Criar botão de controle simplificado
+  const audioBtn = document.createElement('button');
+  audioBtn.id = 'audioControlBtn';
+  audioBtn.className = 'audio-control-btn paused';
+  audioBtn.innerHTML = '🔇'; // Ícone de mudo
+  document.body.appendChild(audioBtn);
 
-  audioElement.addEventListener('error', function(e) {
-    console.error('Erro no carregamento do áudio:', e);
-  });
+  // Função para atualizar o ícone do botão
+  function updateButtonIcon() {
+    if (isAudioPlaying) {
+      audioBtn.innerHTML = '🔊'; // Ícone de som alto
+      audioBtn.classList.add('playing');
+      audioBtn.classList.remove('paused');
+    } else {
+      audioBtn.innerHTML = '🔇'; // Ícone de mudo
+      audioBtn.classList.add('paused');
+      audioBtn.classList.remove('playing');
+    }
+  }
 
   // 🔓 Desbloqueia o áudio no primeiro toque/interação
   function unlockAudio() {
     if (!audioUnlocked) {
-      // Toca e pausa imediatamente para desbloquear
       audioElement.play()
         .then(() => {
           audioElement.pause();
           audioElement.currentTime = 0;
           audioUnlocked = true;
           console.log('Áudio desbloqueado com sucesso!');
-          updateButtonStatus();
         })
         .catch(error => {
           console.log('Aguardando interação do usuário...', error);
@@ -147,11 +157,8 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log('Target encontrado!');
     wasTargetVisible = true;
     
-    // Iniciar animação (já deve funcionar automaticamente com animation-mixer)
-    
-    // Tocar áudio de onde parou
-    if (audioUnlocked) {
-      // Se tinha um tempo salvo, continuar de lá
+    // Tocar áudio automaticamente de onde parou
+    if (audioUnlocked && !isAudioPlaying) {
       if (audioPausedTime > 0) {
         audioElement.currentTime = audioPausedTime;
       }
@@ -159,14 +166,12 @@ document.addEventListener("DOMContentLoaded", function () {
       audioElement.play()
         .then(() => {
           isAudioPlaying = true;
-          console.log('Áudio tocando, tempo:', audioElement.currentTime);
-          updateButtonStatus();
+          console.log('Áudio tocando automaticamente, tempo:', audioElement.currentTime);
+          updateButtonIcon();
         })
         .catch(error => {
           console.error('Erro ao tocar áudio:', error);
         });
-    } else {
-      console.log('Áudio ainda não desbloqueado');
     }
   });
 
@@ -175,76 +180,58 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log('Target perdido!');
     
     if (isAudioPlaying) {
-      // Salvar o tempo atual antes de pausar
       audioPausedTime = audioElement.currentTime;
       audioElement.pause();
       isAudioPlaying = false;
       console.log('Áudio pausado no tempo:', audioPausedTime);
-      updateButtonStatus();
+      updateButtonIcon();
     }
   });
 
-  // 🔄 Garantir que quando a página fechar, nada quebre
-  window.addEventListener('beforeunload', function() {
+  // Botão para controle manual (toggle)
+  audioBtn.addEventListener('click', function() {
+    if (!audioUnlocked) {
+      unlockAudio();
+    }
+    
     if (isAudioPlaying) {
+      // Se estiver tocando, pausa
+      audioPausedTime = audioElement.currentTime;
       audioElement.pause();
+      isAudioPlaying = false;
+      console.log('Áudio pausado manualmente');
+    } else {
+      // Se estiver pausado, toca de onde parou
+      if (audioPausedTime > 0) {
+        audioElement.currentTime = audioPausedTime;
+      }
+      audioElement.play()
+        .then(() => {
+          isAudioPlaying = true;
+          console.log('Áudio tocando manualmente');
+        })
+        .catch(error => console.error('Erro:', error));
     }
+    updateButtonIcon();
   });
 
-  // ⏱️ Monitorar o tempo do áudio periodicamente para manter sincronizado
+  // Monitorar o tempo do áudio
   setInterval(() => {
-    if (isAudioPlaying && wasTargetVisible) {
-      // Atualizar o tempo salvo enquanto toca (backup)
+    if (isAudioPlaying) {
       audioPausedTime = audioElement.currentTime;
     }
   }, 1000);
 
-  // Função para atualizar o botão de controle
-  function updateButtonStatus() {
-    const btn = document.getElementById('audioTestBtn');
-    if (btn) {
-      if (isAudioPlaying) {
-        btn.textContent = '🔊 Áudio Tocando';
-        btn.classList.add('playing');
-        btn.classList.remove('paused');
-      } else {
-        btn.textContent = '🔇 Áudio Pausado';
-        btn.classList.add('paused');
-        btn.classList.remove('playing');
-      }
-    }
-  }
-
-  // Criar botão de controle manual
-  const audioBtn = document.createElement('button');
-  audioBtn.id = 'audioTestBtn';
-  audioBtn.className = 'audio-control-btn paused';
-  audioBtn.textContent = '🔇 Áudio Pausado';
-  document.body.appendChild(audioBtn);
-
-  // Função para toggle manual do áudio
-  window.toggleAudio = function() {
-    if (audioElement.paused) {
-      audioElement.play()
-        .then(() => {
-          isAudioPlaying = true;
-          audioPausedTime = audioElement.currentTime;
-          updateButtonStatus();
-        })
-        .catch(error => console.error('Erro:', error));
-    } else {
-      audioPausedTime = audioElement.currentTime;
-      audioElement.pause();
-      isAudioPlaying = false;
-      updateButtonStatus();
-    }
-  };
-
-  audioBtn.addEventListener('click', toggleAudio);
+  // Quando o áudio terminar, resetar
+  audioElement.addEventListener('ended', function() {
+    isAudioPlaying = false;
+    audioPausedTime = 0;
+    updateButtonIcon();
+    console.log('Áudio terminou');
+  });
 
 });
 </script>
 
 </body>
 </html>
-
