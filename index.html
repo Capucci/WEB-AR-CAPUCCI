@@ -2,7 +2,7 @@
 <html>
 <head>
    <script>
-const VERSION = "4.6.0"; 
+const VERSION = "4.7.0"; 
 // ↑ SEMPRE que atualizar modelo ou target,
 // só mude esse número
 </script>
@@ -51,19 +51,30 @@ button {
       scale="0.7 0.7 0.7">
     </a-entity>
 
-<script>
-AFRAME.registerComponent('auto-start', {
-  init: function () {
-    this.el.addEventListener('targetFound', () => {
-      document.querySelector('#audioMascote')
-              .components.sound.playSound();
-    });
+     let audioUnlocked = false;
+
+document.body.addEventListener("click", function unlock() {
+  audio.play();
+  audio.pause();
+  audio.currentTime = 0;
+  audioUnlocked = true;
+  document.body.removeEventListener("click", unlock);
+});
+
+target.addEventListener("targetFound", () => {
+  if (audioUnlocked) {
+    audio.play();
   }
 });
-</script>
+
+target.addEventListener("targetLost", () => {
+  audio.pause();
+  audio.currentTime = 0;
+});
 
 </body>
 </html>
+
 
 
 
