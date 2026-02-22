@@ -2,7 +2,7 @@
 <html>
 <head>
    <script>
-const VERSION = "4.8.0"; 
+const VERSION = "4.9.1"; 
 // ↑ SEMPRE que atualizar modelo ou target,
 // só mude esse número
 </script>
@@ -39,7 +39,7 @@ button {
 
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-  <a-entity mindar-image-target="targetIndex: 0" auto-start>
+  <a-entity mindar-image-target="targetIndex: 0" id="target-principal">
 
     <!-- MODELO -->
     <a-entity
@@ -51,50 +51,150 @@ button {
       scale="0.7 0.7 0.7">
     </a-entity>
 
-    <script>
+  </a-entity>
+
+  <!-- Elemento de áudio HTML5 escondido (mais confiável para controle) -->
+  <audio id="audioMascote" preload="auto" style="display: none;" loop="false">
+    <source src="AudioTrack11" type="audio/mpeg">
+    <!-- Substitua "sua-musica.mp3" pelo caminho correto do seu arquivo -->
+  </audio>
+
+  <script>
 document.addEventListener("DOMContentLoaded", function () {
 
-  const target = document.querySelector('[mindar-image-target]');
-  const audio = document.querySelector('#audioMascote');
-
+  const target = document.querySelector('#target-principal');
+  
+  // Referência direta ao elemento de áudio HTML5
+  const audioElement = document.querySelector('#audioMascote');
+  
+  // Variáveis de controle
   let audioUnlocked = false;
+  let audioPausedTime = 0;
+  let isAudioPlaying = false;
+  let wasTargetVisible = false;
+  
+  // Verificar se o áudio foi carregado corretamente
+  audioElement.addEventListener('loadedmetadata', function() {
+    console.log('Áudio carregado, duração:', audioElement.duration);
+  });
 
-  // 🔓 Desbloqueia o áudio no primeiro toque
-  document.body.addEventListener("click", function unlock() {
+  audioElement.addEventListener('error', function(e) {
+    console.error('Erro no carregamento do áudio:', e);
+  });
 
-    if (audio.components.sound) {
-      audio.components.sound.playSound();
-      audio.components.sound.stopSound();
-      audioUnlocked = true;
+  // 🔓 Desbloqueia o áudio no primeiro toque/interação
+  function unlockAudio() {
+    if (!audioUnlocked) {
+      // Toca e pausa imediatamente para desbloquear
+      audioElement.play()
+        .then(() => {
+          audioElement.pause();
+          audioElement.currentTime = 0;
+          audioUnlocked = true;
+          console.log('Áudio desbloqueado com sucesso!');
+        })
+        .catch(error => {
+          console.log('Aguardando interação do usuário...', error);
+        });
     }
+  }
 
-    document.body.removeEventListener("click", unlock);
+  // Tentar desbloquear em várias interações
+  document.body.addEventListener("click", unlockAudio);
+  document.body.addEventListener("touchstart", unlockAudio);
+  
+  // Tentar também quando a cena carregar
+  document.querySelector('a-scene').addEventListener('loaded', function() {
+    console.log('Cena carregada, preparando áudio...');
+    unlockAudio();
   });
 
   // ▶ Quando reconhecer o target
   target.addEventListener("targetFound", () => {
-    if (audioUnlocked && audio.components.sound) {
-      audio.components.sound.playSound();
+    console.log('Target encontrado!');
+    wasTargetVisible = true;
+    
+    // Iniciar animação (já deve funcionar automaticamente com animation-mixer)
+    
+    // Tocar áudio de onde parou
+    if (audioUnlocked) {
+      // Se tinha um tempo salvo, continuar de lá
+      if (audioPausedTime > 0) {
+        audioElement.currentTime = audioPausedTime;
+      }
+      
+      audioElement.play()
+        .then(() => {
+          isAudioPlaying = true;
+          console.log('Áudio tocando, tempo:', audioElement.currentTime);
+        })
+        .catch(error => {
+          console.error('Erro ao tocar áudio:', error);
+        });
+    } else {
+      console.log('Áudio ainda não desbloqueado');
     }
   });
 
   // ⏹ Quando perder o target
   target.addEventListener("targetLost", () => {
-    if (audio.components.sound) {
-      audio.components.sound.stopSound();
+    console.log('Target perdido!');
+    
+    if (isAudioPlaying) {
+      // Salvar o tempo atual antes de pausar
+      audioPausedTime = audioElement.currentTime;
+      audioElement.pause();
+      isAudioPlaying = false;
+      console.log('Áudio pausado no tempo:', audioPausedTime);
+    }
+    
+    // Opcional: Parar animação do modelo
+    const modelo = document.querySelector('#mascote');
+    if (modelo && modelo.components['animation-mixer']) {
+      // Para desativar a animação, seria necessário um componente específico
+      // Mas geralmente o animation-mixer não tem stop fácil
     }
   });
+
+  // 🔄 Garantir que quando a página fechar, nada quebre
+  window.addEventListener('beforeunload', function() {
+    if (isAudioPlaying) {
+      audioElement.pause();
+    }
+  });
+
+  // ⏱️ Monitorar o tempo do áudio periodicamente para manter sincronizado
+  setInterval(() => {
+    if (isAudioPlaying && wasTargetVisible) {
+      // Atualizar o tempo salvo enquanto toca (backup)
+      audioPausedTime = audioElement.currentTime;
+    }
+  }, 1000);
+
+  // 📱 Para debug - mostrar status no console periodicamente
+  setInterval(() => {
+    if (wasTargetVisible) {
+      console.log('Status - Tocando:', isAudioPlaying, 'Tempo:', audioElement.currentTime);
+    }
+  }, 5000);
 
 });
 </script>
 
+<!-- Botão de controle manual para teste -->
+<button onclick="toggleAudio()">🔊 Testar Áudio</button>
+
+<script>
+// Função global para teste manual
+function toggleAudio() {
+  const audio = document.querySelector('#audioMascote');
+  if (audio.paused) {
+    audio.play();
+  } else {
+    audio.pause();
+  }
+}
+</script>
+
 </body>
 </html>
-
-
-
-
-
-
-
-
