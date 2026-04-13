@@ -1,1 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AR CapCreator - Meus Projetos</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    .btn-criar {
+      background: white;
+      color: #667eea;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .projetos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 20px;
+    }
+    .projeto-card {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      transition: transform 0.3s;
+    }
+    .projeto-card:hover {
+      transform: translateY(-5px);
+    }
+    .projeto-nome {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .projeto-data {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+    .projeto-stats {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+      font-size: 12px;
+    }
+    .projeto-stats span {
+      background: #f0f0f0;
+      padding: 4px 8px;
+      border-radius: 5px;
+    }
+    .projeto-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      text-align: center;
+      text-decoration: none;
+    }
+    .btn-link { background: #667eea; color: white; }
+    .btn-qr { background: #28a745; color: white; }
+    .btn-ver { background: #17a2b8; color: white; }
+    .vazio {
+      text-align: center;
+      color: white;
+      padding: 50px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎯 AR CapCreator</h1>
+      <a href="criar.html" class="btn-criar">+ Criar Novo Projeto</a>
+    </div>
+    
+    <div id="projetosList" class="projetos-grid">
+      <div class="vazio">Carregando projetos...</div>
+    </div>
+  </div>
 
+  <script>
+    function carregarProjetos() {
+      const projetos = JSON.parse(localStorage.getItem('ar_projetos') || '[]');
+      const container = document.getElementById('projetosList');
+      
+      if (projetos.length === 0) {
+        container.innerHTML = '<div class="vazio">✨ Nenhum projeto criado ainda.<br>Clique em "Criar Novo Projeto" para começar!</div>';
+        return;
+      }
+      
+      projetos.sort((a, b) => new Date(b.data) - new Date(a.data));
+      
+      container.innerHTML = projetos.map(projeto => `
+        <div class="projeto-card">
+          <div class="projeto-nome">${projeto.nome || 'Projeto sem nome'}</div>
+          <div class="projeto-data">📅 Criado em: ${new Date(projeto.data).toLocaleDateString('pt-BR')}</div>
+          <div class="projeto-stats">
+            <span>🎯 ${projeto.targets?.length || 1} target(s)</span>
+            <span>📦 ${projeto.modelo ? '3D' : projeto.video ? 'Vídeo' : 'Nenhum'}</span>
+            <span>🎵 ${projeto.audio ? 'Áudio' : 'Sem áudio'}</span>
+          </div>
+          <div class="projeto-actions">
+            <button class="btn btn-link" onclick="copiarLink('${projeto.id}')">📋 Link</button>
+            <button class="btn btn-qr" onclick="gerarQR('${projeto.id}')">📱 QR</button>
+            <a href="ver.html?id=${projeto.id}" class="btn btn-ver" target="_blank">👁️ Ver</a>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function copiarLink(projetoId) {
+      const url = `${window.location.origin}${window.location.pathname.replace('index.html', '')}ver.html?id=${projetoId}`;
+      navigator.clipboard.writeText(url).then(() => alert('✅ Link copiado!'));
+    }
+    
+    function gerarQR(projetoId) {
+      const url = `${window.location.origin}${window.location.pathname.replace('index.html', '')}ver.html?id=${projetoId}`;
+      const qrUrl = `https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=${encodeURIComponent(url)}&choe=UTF-8`;
+      
+      const modal = document.createElement('div');
+      modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      `;
+      modal.innerHTML = `
+        <div style="background: white; padding: 20px; border-radius: 15px; text-align: center;">
+          <img src="${qrUrl}" style="max-width: 200px;">
+          <p style="margin-top: 15px;">${url}</p>
+          <button onclick="this.parentElement.parentElement.remove()" style="margin-top: 15px; padding: 8px 20px; background: #667eea; color: white; border: none; border-radius: 5px;">Fechar</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+    
+    carregarProjetos();
+  </script>
+</body>
+</html>
