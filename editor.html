@@ -3,204 +3,851 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AR CapCreator - Meus Projetos</title>
+  <title>AR CapCreator - Plataforma Profissional de RA</title>
+  
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 20px;
+      font-family: 'Segoe UI', sans-serif;
+      background: #1a1a2e;
+      overflow: hidden;
+      height: 100vh;
     }
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    h1 {
-      color: white;
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    .header {
+    
+    /* Layout Principal */
+    .app-container {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 30px;
-      flex-wrap: wrap;
-      gap: 10px;
+      height: 100vh;
     }
-    .btn {
-      background: white;
-      color: #667eea;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 10px;
-      font-weight: bold;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-block;
-    }
-    .btn-editor {
-      background: #ff9800;
+    
+    /* Barra Lateral - Cenas */
+    .scenes-sidebar {
+      width: 280px;
+      background: #0f0f1a;
       color: white;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #2a2a3a;
     }
-    .btn-criar {
-      background: white;
-      color: #667eea;
-    }
-    .projetos-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      gap: 20px;
-    }
-    .projeto-card {
-      background: white;
-      border-radius: 15px;
+    
+    .scenes-header {
       padding: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      transition: transform 0.3s;
+      background: #1a1a2e;
+      border-bottom: 1px solid #2a2a3a;
     }
-    .projeto-card:hover {
-      transform: translateY(-5px);
-    }
-    .projeto-nome {
-      font-size: 18px;
-      font-weight: bold;
-      color: #333;
+    
+    .scenes-header h3 {
+      color: #e94560;
       margin-bottom: 10px;
     }
-    .projeto-data {
-      font-size: 12px;
-      color: #666;
-      margin-bottom: 15px;
-    }
-    .projeto-stats {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 15px;
-      font-size: 12px;
-    }
-    .projeto-stats span {
-      background: #f0f0f0;
-      padding: 4px 8px;
-      border-radius: 5px;
-    }
-    .projeto-actions {
-      display: flex;
-      gap: 10px;
-    }
-    .btn-link { background: #667eea; color: white; padding: 8px; border: none; border-radius: 5px; cursor: pointer; flex: 1; }
-    .btn-qr { background: #28a745; color: white; padding: 8px; border: none; border-radius: 5px; cursor: pointer; flex: 1; }
-    .btn-ver { background: #17a2b8; color: white; padding: 8px; border: none; border-radius: 5px; cursor: pointer; flex: 1; text-align: center; text-decoration: none; display: inline-block; }
-    .vazio {
-      text-align: center;
+    
+    .btn-add-scene {
+      background: #e94560;
       color: white;
-      padding: 50px;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      font-weight: bold;
     }
-    .info-box {
-      background: rgba(255,255,255,0.2);
+    
+    .scenes-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+    
+    .scene-item {
+      background: #1a1a2e;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    
+    .scene-item:hover {
+      background: #2a2a3a;
+    }
+    
+    .scene-item.active {
+      border-left-color: #e94560;
+      background: #2a2a3a;
+    }
+    
+    .scene-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .scene-stats {
+      font-size: 11px;
+      color: #888;
+    }
+    
+    .scene-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    
+    .scene-actions button {
+      background: none;
+      border: none;
+      color: #888;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .scene-actions button:hover {
+      color: #e94560;
+    }
+    
+    /* Painel Central - Editor */
+    .editor-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    /* Preview AR */
+    .ar-preview {
+      flex: 2;
+      background: #000;
+      position: relative;
+    }
+    
+    a-scene {
+      width: 100%;
+      height: 100%;
+    }
+    
+    /* Painel de Controles */
+    .controls-panel {
+      flex: 1.5;
+      background: #16213e;
+      color: white;
+      padding: 20px;
+      overflow-y: auto;
+      border-top: 1px solid #2a2a3a;
+    }
+    
+    /* Tabs dentro do painel */
+    .editor-tabs {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #2a2a3a;
+      padding-bottom: 10px;
+    }
+    
+    .editor-tab {
+      background: none;
+      border: none;
+      padding: 8px 16px;
+      color: #aaa;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: all 0.2s;
+    }
+    
+    .editor-tab.active {
+      background: #e94560;
+      color: white;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    /* Upload Areas */
+    .upload-area {
+      border: 2px dashed #2a2a3a;
       border-radius: 10px;
       padding: 15px;
-      margin-bottom: 30px;
+      text-align: center;
+      cursor: pointer;
+      margin-bottom: 15px;
+      transition: all 0.3s;
+    }
+    
+    .upload-area:hover {
+      border-color: #e94560;
+      background: #1a1a2e;
+    }
+    
+    .upload-area.has-file {
+      border-color: #28a745;
+      background: #1a3a1a;
+    }
+    
+    .file-info {
+      font-size: 11px;
+      color: #aaa;
+      margin-top: 5px;
+    }
+    
+    /* Sliders e controles */
+    .control-group {
+      background: #1a1a2e;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .control-group h4 {
+      color: #e94560;
+      margin-bottom: 15px;
+    }
+    
+    .slider-item {
+      margin-bottom: 12px;
+    }
+    
+    .slider-item label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+    
+    input[type=range] {
+      width: 100%;
+      background: #2a2a3a;
+      height: 4px;
+      border-radius: 2px;
+    }
+    
+    .coord-group {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .coord-input {
       text-align: center;
     }
-    .info-box p {
-      color: white;
-      margin-bottom: 10px;
+    
+    .coord-input label {
+      display: block;
+      font-size: 11px;
+      margin-bottom: 5px;
     }
-    .btn-info {
-      background: #ff9800;
+    
+    .coord-input input {
+      width: 100%;
+      padding: 6px;
+      background: #1a1a2e;
+      border: 1px solid #2a2a3a;
+      color: white;
+      border-radius: 5px;
+      text-align: center;
+    }
+    
+    /* Botões */
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
       border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
+      padding: 12px;
+      border-radius: 8px;
       cursor: pointer;
+      width: 100%;
       font-weight: bold;
+      margin-top: 10px;
+    }
+    
+    .btn-success {
+      background: #28a745;
+    }
+    
+    .btn-warning {
+      background: #ff9800;
+    }
+    
+    /* Resultado */
+    .result-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+    }
+    
+    .result-card {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+      max-width: 400px;
+    }
+    
+    .result-card .url {
+      word-break: break-all;
+      background: #f0f0f0;
+      padding: 10px;
+      border-radius: 5px;
+      margin: 15px 0;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>🎯 AR CapCreator</h1>
-      <div>
-        <a href="editor.html" class="btn btn-editor">🎨 EDITOR VISUAL</a>
-        <a href="criar.html" class="btn btn-criar">+ Criar Novo Projeto</a>
+  <div class="app-container">
+    <!-- BARRA LATERAL - CENAS -->
+    <div class="scenes-sidebar">
+      <div class="scenes-header">
+        <h3>🎬 CENAS</h3>
+        <button class="btn-add-scene" id="btnAddScene">+ Nova Cena</button>
+      </div>
+      <div class="scenes-list" id="scenesList">
+        <!-- Cenas serão listadas aqui -->
       </div>
     </div>
     
-    <div class="info-box">
-      <p>✨ <strong>EDITOR VISUAL</strong> - Crie projetos arrastando elementos em tempo real!</p>
-      <a href="editor.html" class="btn-info">🚀 ABRIR EDITOR VISUAL</a>
+    <!-- PAINEL PRINCIPAL -->
+    <div class="editor-panel">
+      <!-- Preview AR -->
+      <div class="ar-preview">
+        <a-scene
+          id="arScene"
+          mindar-image="imageTargetSrc: ; autoStart: true;"
+          vr-mode-ui="enabled: false"
+          device-orientation-permission-ui="enabled: true"
+          embedded>
+          
+          <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+          <a-entity mindar-image-target="targetIndex: 0" id="targetContainer"></a-entity>
+          <a-light type="ambient" intensity="0.5"></a-light>
+          <a-light type="directional" intensity="1" position="1 2 1"></a-light>
+        </a-scene>
+      </div>
+      
+      <!-- Painel de Controles -->
+      <div class="controls-panel">
+        <div class="editor-tabs">
+          <button class="editor-tab active" data-tab="elementos">📦 Elementos</button>
+          <button class="editor-tab" data-tab="ajustes">⚙️ Ajustes</button>
+          <button class="editor-tab" data-tab="interacao">🔗 Interação</button>
+        </div>
+        
+        <!-- ABA: ELEMENTOS -->
+        <div class="tab-content active" id="tab-elementos">
+          <div class="upload-area" id="uploadTargetBtn">
+            <div style="font-size: 32px;">🎯</div>
+            <div><strong>Target (.mind)</strong></div>
+            <div class="file-info" id="targetInfo">Clique para carregar o target</div>
+          </div>
+          
+          <div class="upload-area" id="uploadModeloBtn">
+            <div style="font-size: 32px;">📦</div>
+            <div><strong>Objeto 3D (.glb)</strong></div>
+            <div class="file-info" id="modeloInfo">Clique para adicionar</div>
+          </div>
+          
+          <div class="upload-area" id="uploadVideoBtn">
+            <div style="font-size: 32px;">🎬</div>
+            <div><strong>Vídeo (.mp4)</strong></div>
+            <div class="file-info" id="videoInfo">Clique para adicionar</div>
+          </div>
+          
+          <div class="upload-area" id="uploadImagemBtn">
+            <div style="font-size: 32px;">🖼️</div>
+            <div><strong>Imagem (.png/.jpg)</strong></div>
+            <div class="file-info" id="imagemInfo">Clique para adicionar</div>
+          </div>
+          
+          <div class="upload-area" id="uploadAudioBtn">
+            <div style="font-size: 32px;">🎵</div>
+            <div><strong>Áudio (.mp3)</strong></div>
+            <div class="file-info" id="audioInfo">Clique para adicionar</div>
+          </div>
+        </div>
+        
+        <!-- ABA: AJUSTES -->
+        <div class="tab-content" id="tab-ajustes">
+          <div class="control-group">
+            <h4>📍 Posição</h4>
+            <div class="coord-group">
+              <div class="coord-input">
+                <label>X</label>
+                <input type="number" id="posX" step="0.05" value="0">
+              </div>
+              <div class="coord-input">
+                <label>Y</label>
+                <input type="number" id="posY" step="0.05" value="0">
+              </div>
+              <div class="coord-input">
+                <label>Z</label>
+                <input type="number" id="posZ" step="0.05" value="0">
+              </div>
+            </div>
+          </div>
+          
+          <div class="control-group">
+            <h4>🔄 Rotação</h4>
+            <div class="coord-group">
+              <div class="coord-input">
+                <label>X</label>
+                <input type="number" id="rotX" step="5" value="0">
+              </div>
+              <div class="coord-input">
+                <label>Y</label>
+                <input type="number" id="rotY" step="5" value="0">
+              </div>
+              <div class="coord-input">
+                <label>Z</label>
+                <input type="number" id="rotZ" step="5" value="0">
+              </div>
+            </div>
+          </div>
+          
+          <div class="control-group">
+            <h4>📏 Escala</h4>
+            <input type="range" id="scale" min="0.1" max="10" step="0.1" value="1">
+            <label style="text-align: center; display: block;">Valor: <span id="scaleVal">1.0</span></label>
+          </div>
+          
+          <div class="control-group" id="videoConfig" style="display: none;">
+            <h4>🎬 Configurações de Vídeo</h4>
+            <div class="slider-item">
+              <label>Sensibilidade Chroma Key <span id="chromaVal">0.4</span></label>
+              <input type="range" id="chromaSens" min="0" max="1" step="0.05" value="0.4">
+            </div>
+            <div class="slider-item">
+              <label>Cor Chroma Key</label>
+              <input type="color" id="chromaColor" value="#00ff00" style="width: 100%;">
+            </div>
+          </div>
+        </div>
+        
+        <!-- ABA: INTERAÇÃO -->
+        <div class="tab-content" id="tab-interacao">
+          <div class="control-group">
+            <h4>🔊 Áudio</h4>
+            <select id="audioMode" style="width: 100%; padding: 8px; background: #1a1a2e; color: white; border: 1px solid #2a2a3a; border-radius: 5px;">
+              <option value="once">Tocar uma só vez</option>
+              <option value="loop">Tocar em Looping</option>
+            </select>
+          </div>
+          
+          <div class="control-group">
+            <h4>🖱️ Ao clicar no elemento</h4>
+            <select id="clickAction" style="width: 100%; padding: 8px; background: #1a1a2e; color: white; border: 1px solid #2a2a3a; border-radius: 5px; margin-bottom: 10px;">
+              <option value="none">Nenhuma ação</option>
+              <option value="scene">Ir para outra cena</option>
+              <option value="url">Abrir URL</option>
+            </select>
+            
+            <div id="clickSceneConfig" style="display: none;">
+              <label>Ir para cena:</label>
+              <select id="targetScene" style="width: 100%; padding: 8px; background: #1a1a2e; color: white; border: 1px solid #2a2a3a; border-radius: 5px;">
+                <option value="">Selecione uma cena</option>
+              </select>
+            </div>
+            
+            <div id="clickUrlConfig" style="display: none;">
+              <label>URL:</label>
+              <input type="text" id="targetUrl" placeholder="https://..." style="width: 100%; padding: 8px; background: #1a1a2e; color: white; border: 1px solid #2a2a3a; border-radius: 5px;">
+            </div>
+          </div>
+        </div>
+        
+        <button class="btn-primary" id="btnSalvarCena">💾 Salvar Cena Atual</button>
+        <button class="btn-primary btn-success" id="btnSalvarProjeto">🚀 SALVAR PROJETO COMPLETO</button>
+      </div>
     </div>
-    
-    <div id="projetosList" class="projetos-grid">
-      <div class="vazio">Carregando projetos...</div>
+  </div>
+  
+  <!-- Modal de Resultado -->
+  <div class="result-overlay" id="resultOverlay">
+    <div class="result-card">
+      <h2 style="color: #28a745;">✅ PROJETO SALVO!</h2>
+      <div class="url" id="resultUrl"></div>
+      <div id="resultQr"></div>
+      <button onclick="document.getElementById('resultOverlay').style.display='none'" style="margin-top: 15px; padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px;">Fechar</button>
     </div>
   </div>
 
   <script>
-    function carregarProjetos() {
-      const projetos = JSON.parse(localStorage.getItem('ar_projetos') || '[]');
-      const container = document.getElementById('projetosList');
-      
-      if (projetos.length === 0) {
-        container.innerHTML = '<div class="vazio">✨ Nenhum projeto criado ainda.<br><br>👉 Clique em "EDITOR VISUAL" para começar!</div>';
-        return;
+    // ============================================
+    // ESTRUTURA DE DADOS
+    // ============================================
+    let cenas = [];
+    let cenaAtualId = null;
+    let elementoSelecionado = null;
+    let targetFile = null;
+    
+    // Elementos da cena atual
+    let cenaElementos = {
+      target: null,
+      modelo: null,
+      video: null,
+      imagem: null,
+      audio: null,
+      config: {
+        posX: 0, posY: 0, posZ: 0,
+        rotX: 0, rotY: 0, rotZ: 0,
+        scale: 1,
+        chromaSens: 0.4,
+        chromaColor: '#00ff00',
+        audioMode: 'loop',
+        clickAction: 'none',
+        targetScene: '',
+        targetUrl: ''
       }
-      
-      projetos.sort((a, b) => new Date(b.data) - new Date(a.data));
-      
-      container.innerHTML = projetos.map(projeto => `
-        <div class="projeto-card">
-          <div class="projeto-nome">${projeto.nome || 'Projeto sem nome'}</div>
-          <div class="projeto-data">📅 Criado em: ${new Date(projeto.data).toLocaleDateString('pt-BR')}</div>
-          <div class="projeto-stats">
-            <span>🎯 ${projeto.target ? 'Target' : 'Sem target'}</span>
-            <span>📦 ${projeto.elementos ? projeto.elementos.length : 0} elemento(s)</span>
+    };
+    
+    // ============================================
+    // FUNÇÕES DE CENA
+    // ============================================
+    
+    function adicionarCena() {
+      const novaCena = {
+        id: Date.now(),
+        nome: `CENA ${String(cenas.length + 1).padStart(2, '0')}`,
+        elementos: {
+          target: null,
+          modelo: null,
+          video: null,
+          imagem: null,
+          audio: null,
+          config: {
+            posX: 0, posY: 0, posZ: 0,
+            rotX: 0, rotY: 0, rotZ: 0,
+            scale: 1,
+            chromaSens: 0.4,
+            chromaColor: '#00ff00',
+            audioMode: 'loop',
+            clickAction: 'none',
+            targetScene: '',
+            targetUrl: ''
+          }
+        }
+      };
+      cenas.push(novaCena);
+      renderizarListaCenas();
+      selecionarCena(novaCena.id);
+    }
+    
+    function renderizarListaCenas() {
+      const container = document.getElementById('scenesList');
+      container.innerHTML = cenas.map(cena => `
+        <div class="scene-item ${cenaAtualId === cena.id ? 'active' : ''}" onclick="selecionarCena(${cena.id})">
+          <div class="scene-name">🎬 ${cena.nome}</div>
+          <div class="scene-stats">
+            ${cena.elementos.modelo ? '📦 ' : ''}
+            ${cena.elementos.video ? '🎬 ' : ''}
+            ${cena.elementos.imagem ? '🖼️ ' : ''}
+            ${cena.elementos.audio ? '🎵 ' : ''}
           </div>
-          <div class="projeto-actions">
-            <button class="btn-link" onclick="copiarLink('${projeto.id}')">📋 Link</button>
-            <button class="btn-qr" onclick="gerarQR('${projeto.id}')">📱 QR</button>
-            <a href="ver.html?id=${projeto.id}" class="btn-ver" target="_blank">👁️ Ver</a>
+          <div class="scene-actions">
+            <button onclick="event.stopPropagation(); renomearCena(${cena.id})">✏️</button>
+            <button onclick="event.stopPropagation(); duplicarCena(${cena.id})">📋</button>
+            <button onclick="event.stopPropagation(); excluirCena(${cena.id})">🗑️</button>
           </div>
         </div>
       `).join('');
-    }
-    
-    function copiarLink(projetoId) {
-      const url = `${window.location.origin}${window.location.pathname.replace('index.html', '')}ver.html?id=${projetoId}`;
-      navigator.clipboard.writeText(url).then(() => alert('✅ Link copiado!'));
-    }
-    
-    function gerarQR(projetoId) {
-      const url = `${window.location.origin}${window.location.pathname.replace('index.html', '')}ver.html?id=${projetoId}`;
-      const qrUrl = `https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=${encodeURIComponent(url)}&choe=UTF-8`;
       
-      const modal = document.createElement('div');
-      modal.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.8);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-      `;
-      modal.innerHTML = `
-        <div style="background: white; padding: 20px; border-radius: 15px; text-align: center;">
-          <img src="${qrUrl}" style="max-width: 200px;">
-          <p style="margin-top: 15px; word-break: break-all; font-size: 12px;">${url}</p>
-          <button onclick="this.parentElement.parentElement.remove()" style="margin-top: 15px; padding: 8px 20px; background: #667eea; color: white; border: none; border-radius: 5px;">Fechar</button>
-        </div>
-      `;
-      document.body.appendChild(modal);
+      // Atualizar dropdown de cenas para interação
+      const sceneSelect = document.getElementById('targetScene');
+      if (sceneSelect) {
+        sceneSelect.innerHTML = cenas.map(cena => `<option value="${cena.id}">${cena.nome}</option>`).join('');
+      }
     }
     
-    carregarProjetos();
+    function selecionarCena(id) {
+      cenaAtualId = id;
+      const cena = cenas.find(c => c.id === id);
+      if (cena) {
+        cenaElementos = cena.elementos;
+        carregarCenaNaInterface();
+      }
+      renderizarListaCenas();
+      renderizarCenaAR();
+    }
+    
+    function carregarCenaNaInterface() {
+      // Atualizar sliders
+      document.getElementById('posX').value = cenaElementos.config.posX;
+      document.getElementById('posY').value = cenaElementos.config.posY;
+      document.getElementById('posZ').value = cenaElementos.config.posZ;
+      document.getElementById('rotX').value = cenaElementos.config.rotX;
+      document.getElementById('rotY').value = cenaElementos.config.rotY;
+      document.getElementById('rotZ').value = cenaElementos.config.rotZ;
+      document.getElementById('scale').value = cenaElementos.config.scale;
+      document.getElementById('scaleVal').innerText = cenaElementos.config.scale;
+      document.getElementById('chromaSens').value = cenaElementos.config.chromaSens;
+      document.getElementById('chromaColor').value = cenaElementos.config.chromaColor;
+      document.getElementById('audioMode').value = cenaElementos.config.audioMode;
+      document.getElementById('clickAction').value = cenaElementos.config.clickAction;
+      document.getElementById('targetScene').value = cenaElementos.config.targetScene;
+      document.getElementById('targetUrl').value = cenaElementos.config.targetUrl;
+      
+      // Atualizar infos de arquivos
+      if (cenaElementos.target) {
+        document.getElementById('targetInfo').innerHTML = `✅ ${cenaElementos.target.name}`;
+        document.getElementById('uploadTargetBtn').classList.add('has-file');
+      }
+      if (cenaElementos.modelo) {
+        document.getElementById('modeloInfo').innerHTML = `✅ ${cenaElementos.modelo.name}`;
+        document.getElementById('uploadModeloBtn').classList.add('has-file');
+      }
+      if (cenaElementos.video) {
+        document.getElementById('videoInfo').innerHTML = `✅ ${cenaElementos.video.name}`;
+        document.getElementById('uploadVideoBtn').classList.add('has-file');
+        document.getElementById('videoConfig').style.display = 'block';
+      }
+      if (cenaElementos.imagem) {
+        document.getElementById('imagemInfo').innerHTML = `✅ ${cenaElementos.imagem.name}`;
+        document.getElementById('uploadImagemBtn').classList.add('has-file');
+      }
+      if (cenaElementos.audio) {
+        document.getElementById('audioInfo').innerHTML = `✅ ${cenaElementos.audio.name}`;
+        document.getElementById('uploadAudioBtn').classList.add('has-file');
+      }
+    }
+    
+    function renderizarCenaAR() {
+      const container = document.getElementById('targetContainer');
+      container.innerHTML = '';
+      
+      if (!cenaElementos.modelo && !cenaElementos.video && !cenaElementos.imagem) return;
+      
+      const entity = document.createElement('a-entity');
+      entity.setAttribute('position', `${cenaElementos.config.posX} ${cenaElementos.config.posY} ${cenaElementos.config.posZ}`);
+      entity.setAttribute('scale', `${cenaElementos.config.scale} ${cenaElementos.config.scale} ${cenaElementos.config.scale}`);
+      entity.setAttribute('rotation', `${cenaElementos.config.rotX} ${cenaElementos.config.rotY} ${cenaElementos.config.rotZ}`);
+      
+      if (cenaElementos.modelo) {
+        entity.setAttribute('gltf-model', URL.createObjectURL(cenaElementos.modelo.file));
+        entity.setAttribute('animation-mixer', '');
+      } else if (cenaElementos.video) {
+        entity.setAttribute('video', `src: ${URL.createObjectURL(cenaElementos.video.file)}; loop: true; autoplay: true`);
+        entity.setAttribute('material', `shader: standard; transparent: true`);
+        entity.setAttribute('geometry', 'primitive: plane; width: 2; height: 1.5');
+      } else if (cenaElementos.imagem) {
+        entity.setAttribute('image', `src: ${URL.createObjectURL(cenaElementos.imagem.file)}`);
+        entity.setAttribute('geometry', 'primitive: plane; width: 2; height: 2');
+      }
+      
+      container.appendChild(entity);
+    }
+    
+    function salvarCenaAtual() {
+      const cena = cenas.find(c => c.id === cenaAtualId);
+      if (cena) {
+        cena.elementos = JSON.parse(JSON.stringify(cenaElementos));
+        renderizarListaCenas();
+        alert(`✅ Cena "${cena.nome}" salva!`);
+      }
+    }
+    
+    function renomearCena(id) {
+      const cena = cenas.find(c => c.id === id);
+      if (cena) {
+        const novoNome = prompt('Novo nome da cena:', cena.nome);
+        if (novoNome) {
+          cena.nome = novoNome;
+          renderizarListaCenas();
+        }
+      }
+    }
+    
+    function duplicarCena(id) {
+      const cena = cenas.find(c => c.id === id);
+      if (cena) {
+        const novaCena = JSON.parse(JSON.stringify(cena));
+        novaCena.id = Date.now();
+        novaCena.nome = `${cena.nome} (cópia)`;
+        cenas.push(novaCena);
+        renderizarListaCenas();
+      }
+    }
+    
+    function excluirCena(id) {
+      if (confirm('Excluir esta cena?')) {
+        cenas = cenas.filter(c => c.id !== id);
+        if (cenaAtualId === id) {
+          cenaAtualId = cenas.length > 0 ? cenas[0].id : null;
+          if (cenaAtualId) selecionarCena(cenaAtualId);
+        }
+        renderizarListaCenas();
+      }
+    }
+    
+    // ============================================
+    // FUNÇÕES DE UPLOAD
+    // ============================================
+    
+    function uploadFile(tipo, accept, field) {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = accept;
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          cenaElementos[field] = { name: file.name, file: file };
+          document.getElementById(`${field}Info`).innerHTML = `✅ ${file.name}`;
+          document.getElementById(`upload${field.charAt(0).toUpperCase() + field.slice(1)}Btn`).classList.add('has-file');
+          
+          if (field === 'video') document.getElementById('videoConfig').style.display = 'block';
+          renderizarCenaAR();
+        }
+      };
+      input.click();
+    }
+    
+    function uploadTarget() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.mind';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          cenaElementos.target = { name: file.name, file: file };
+          targetFile = file;
+          document.getElementById('targetInfo').innerHTML = `✅ ${file.name}`;
+          document.getElementById('uploadTargetBtn').classList.add('has-file');
+          
+          const url = URL.createObjectURL(file);
+          document.getElementById('arScene').setAttribute('mindar-image', `imageTargetSrc: ${url}; autoStart: true;`);
+        }
+      };
+      input.click();
+    }
+    
+    // ============================================
+    // SALVAR PROJETO COMPLETO
+    // ============================================
+    
+    function salvarProjetoCompleto() {
+      const projetoId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+      
+      const projeto = {
+        id: projetoId,
+        nome: 'Projeto AR Completo',
+        data: new Date().toISOString(),
+        cenas: cenas.map(cena => ({
+          id: cena.id,
+          nome: cena.nome,
+          elementos: {
+            target: cena.elementos.target ? { name: cena.elementos.target.name } : null,
+            modelo: cena.elementos.modelo ? { name: cena.elementos.modelo.name } : null,
+            video: cena.elementos.video ? { name: cena.elementos.video.name } : null,
+            imagem: cena.elementos.imagem ? { name: cena.elementos.imagem.name } : null,
+            audio: cena.elementos.audio ? { name: cena.elementos.audio.name } : null,
+            config: cena.elementos.config
+          }
+        }))
+      };
+      
+      const projetos = JSON.parse(localStorage.getItem('ar_projetos') || '[]');
+      projetos.push(projeto);
+      localStorage.setItem('ar_projetos', JSON.stringify(projetos));
+      
+      const baseUrl = window.location.origin + window.location.pathname.replace('editor.html', '');
+      const projectUrl = `${baseUrl}ver.html?id=${projetoId}`;
+      
+      document.getElementById('resultUrl').innerHTML = projectUrl;
+      const qrUrl = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(projectUrl)}&choe=UTF-8`;
+      document.getElementById('resultQr').innerHTML = `<img src="${qrUrl}">`;
+      document.getElementById('resultOverlay').style.display = 'flex';
+      
+      navigator.clipboard.writeText(projectUrl);
+    }
+    
+    // ============================================
+    // EVENTOS E INICIALIZAÇÃO
+    // ============================================
+    
+    // Abas
+    document.querySelectorAll('.editor-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.editor-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+      });
+    });
+    
+    // Ações de clique
+    document.getElementById('clickAction').addEventListener('change', (e) => {
+      const val = e.target.value;
+      document.getElementById('clickSceneConfig').style.display = val === 'scene' ? 'block' : 'none';
+      document.getElementById('clickUrlConfig').style.display = val === 'url' ? 'block' : 'none';
+      cenaElementos.config.clickAction = val;
+    });
+    
+    // Atualizar configurações em tempo real
+    const updateConfig = () => {
+      cenaElementos.config.posX = parseFloat(document.getElementById('posX').value);
+      cenaElementos.config.posY = parseFloat(document.getElementById('posY').value);
+      cenaElementos.config.posZ = parseFloat(document.getElementById('posZ').value);
+      cenaElementos.config.rotX = parseFloat(document.getElementById('rotX').value);
+      cenaElementos.config.rotY = parseFloat(document.getElementById('rotY').value);
+      cenaElementos.config.rotZ = parseFloat(document.getElementById('rotZ').value);
+      cenaElementos.config.scale = parseFloat(document.getElementById('scale').value);
+      cenaElementos.config.chromaSens = parseFloat(document.getElementById('chromaSens').value);
+      cenaElementos.config.chromaColor = document.getElementById('chromaColor').value;
+      cenaElementos.config.audioMode = document.getElementById('audioMode').value;
+      cenaElementos.config.targetScene = document.getElementById('targetScene').value;
+      cenaElementos.config.targetUrl = document.getElementById('targetUrl').value;
+      
+      document.getElementById('scaleVal').innerText = cenaElementos.config.scale;
+      document.getElementById('chromaVal').innerText = cenaElementos.config.chromaSens;
+      
+      renderizarCenaAR();
+    };
+    
+    document.getElementById('posX').addEventListener('input', updateConfig);
+    document.getElementById('posY').addEventListener('input', updateConfig);
+    document.getElementById('posZ').addEventListener('input', updateConfig);
+    document.getElementById('rotX').addEventListener('input', updateConfig);
+    document.getElementById('rotY').addEventListener('input', updateConfig);
+    document.getElementById('rotZ').addEventListener('input', updateConfig);
+    document.getElementById('scale').addEventListener('input', updateConfig);
+    document.getElementById('chromaSens').addEventListener('input', updateConfig);
+    document.getElementById('chromaColor').addEventListener('input', updateConfig);
+    document.getElementById('audioMode').addEventListener('change', updateConfig);
+    document.getElementById('targetScene').addEventListener('change', updateConfig);
+    document.getElementById('targetUrl').addEventListener('input', updateConfig);
+    
+    // Botões de upload
+    document.getElementById('uploadTargetBtn').onclick = uploadTarget;
+    document.getElementById('uploadModeloBtn').onclick = () => uploadFile('modelo', '.glb,.gltf', 'modelo');
+    document.getElementById('uploadVideoBtn').onclick = () => uploadFile('video', '.mp4', 'video');
+    document.getElementById('uploadImagemBtn').onclick = () => uploadFile('imagem', '.png,.jpg,.jpeg', 'imagem');
+    document.getElementById('uploadAudioBtn').onclick = () => uploadFile('audio', '.mp3', 'audio');
+    
+    document.getElementById('btnSalvarCena').onclick = salvarCenaAtual;
+    document.getElementById('btnSalvarProjeto').onclick = salvarProjetoCompleto;
+    document.getElementById('btnAddScene').onclick = adicionarCena;
+    
+    // Inicializar com uma cena padrão
+    adicionarCena();
+    
+    // Expor funções globais
+    window.selecionarCena = selecionarCena;
+    window.renomearCena = renomearCena;
+    window.duplicarCena = duplicarCena;
+    window.excluirCena = excluirCena;
   </script>
 </body>
 </html>
