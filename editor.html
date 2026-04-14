@@ -1,1 +1,710 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editor AR - Visualizador ao Vivo</title>
+  
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #1a1a2e;
+      overflow: hidden;
+      height: 100vh;
+    }
+    
+    /* Layout */
+    .editor-container {
+      display: flex;
+      height: 100vh;
+    }
+    
+    /* Painel de controle */
+    .control-panel {
+      width: 320px;
+      background: #16213e;
+      color: white;
+      padding: 20px;
+      overflow-y: auto;
+      z-index: 10;
+      border-left: 1px solid #0f3460;
+    }
+    
+    .control-panel h3 {
+      color: #e94560;
+      margin-bottom: 15px;
+      margin-top: 20px;
+    }
+    
+    .control-panel h3:first-child {
+      margin-top: 0;
+    }
+    
+    /* Preview da câmera */
+    .preview-area {
+      flex: 1;
+      position: relative;
+      background: #000;
+    }
+    
+    a-scene {
+      width: 100%;
+      height: 100%;
+    }
+    
+    /* Lista de elementos */
+    .elementos-list {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+    }
+    
+    .elemento-item {
+      background: #0f3460;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .elemento-item:hover {
+      background: #1a4a8b;
+    }
+    
+    .elemento-item.selected {
+      background: #e94560;
+      border-left: 3px solid white;
+    }
+    
+    .elemento-icon {
+      font-size: 20px;
+    }
+    
+    .elemento-info {
+      flex: 1;
+      margin-left: 10px;
+      font-size: 12px;
+    }
+    
+    .elemento-actions button {
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+      margin-left: 5px;
+    }
+    
+    /* Upload areas */
+    .upload-area {
+      border: 2px dashed #0f3460;
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      margin-bottom: 15px;
+      transition: all 0.3s;
+    }
+    
+    .upload-area:hover {
+      border-color: #e94560;
+      background: #0f3460;
+    }
+    
+    .file-info {
+      font-size: 11px;
+      color: #aaa;
+      margin-top: 5px;
+    }
+    
+    /* Sliders */
+    .slider-group {
+      margin-bottom: 15px;
+    }
+    
+    .slider-group label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+    
+    input[type=range] {
+      width: 100%;
+      background: #0f3460;
+      height: 4px;
+      border-radius: 2px;
+    }
+    
+    input[type=color] {
+      width: 100%;
+      height: 35px;
+      border: none;
+      border-radius: 5px;
+      background: #0f3460;
+    }
+    
+    /* Botões */
+    .btn {
+      background: #e94560;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+      margin-top: 10px;
+      transition: all 0.2s;
+    }
+    
+    .btn:hover {
+      background: #ff6b8b;
+      transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+      background: #0f3460;
+    }
+    
+    .btn-secondary:hover {
+      background: #1a4a8b;
+    }
+    
+    .btn-success {
+      background: #28a745;
+    }
+    
+    /* Abas */
+    .tabs {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 20px;
+    }
+    
+    .tab {
+      flex: 1;
+      background: #0f3460;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      text-align: center;
+    }
+    
+    .tab.active {
+      background: #e94560;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="editor-container">
+    <!-- Painel de Controle -->
+    <div class="control-panel">
+      <h2>🎮 Editor AR</h2>
+      <p style="font-size: 12px; color: #aaa; margin-bottom: 20px;">Aponte a câmera para o target e ajuste os elementos em tempo real</p>
+      
+      <!-- Abas -->
+      <div class="tabs">
+        <button class="tab active" data-tab="elementos">📋 Elementos</button>
+        <button class="tab" data-tab="adicionar">➕ Adicionar</button>
+        <button class="tab" data-tab="config">⚙️ Config</button>
+      </div>
+      
+      <!-- Aba: Lista de Elementos -->
+      <div class="tab-content active" id="tab-elementos">
+        <h3>Elementos na Cena</h3>
+        <div id="elementosList" class="elementos-list">
+          <div style="text-align: center; color: #aaa;">Nenhum elemento</div>
+        </div>
+        
+        <button class="btn btn-secondary" id="limparElementosBtn">🗑️ Limpar Todos</button>
+      </div>
+      
+      <!-- Aba: Adicionar Elemento -->
+      <div class="tab-content" id="tab-adicionar">
+        <h3>Adicionar Novo Elemento</h3>
+        
+        <div class="upload-area" id="addModeloBtn">
+          <div style="font-size: 32px;">📦</div>
+          <div>Modelo 3D (.glb)</div>
+          <div class="file-info" id="modeloInfo">Clique para adicionar</div>
+        </div>
+        
+        <div class="upload-area" id="addVideoBtn">
+          <div style="font-size: 32px;">🎬</div>
+          <div>Vídeo (.mp4)</div>
+          <div class="file-info" id="videoInfo">Clique para adicionar</div>
+        </div>
+        
+        <div class="upload-area" id="addImagemBtn">
+          <div style="font-size: 32px;">🖼️</div>
+          <div>Imagem (.png/.jpg)</div>
+          <div class="file-info" id="imagemInfo">Clique para adicionar</div>
+        </div>
+        
+        <div class="upload-area" id="addTextoBtn">
+          <div style="font-size: 32px;">📝</div>
+          <div>Texto</div>
+          <div class="file-info" id="textoInfo">Clique para adicionar</div>
+        </div>
+        
+        <div class="upload-area" id="addAudioBtn">
+          <div style="font-size: 32px;">🎵</div>
+          <div>Áudio (.mp3)</div>
+          <div class="file-info" id="audioInfo">Clique para adicionar</div>
+        </div>
+      </div>
+      
+      <!-- Aba: Configurações do Elemento Selecionado -->
+      <div class="tab-content" id="tab-config">
+        <h3 id="selectedNome">Nenhum selecionado</h3>
+        
+        <div id="configControls" style="display: none;">
+          <div class="slider-group">
+            <label>Posição X <span id="posXVal">0</span></label>
+            <input type="range" id="posX" min="-5" max="5" step="0.05" value="0">
+          </div>
+          <div class="slider-group">
+            <label>Posição Y <span id="posYVal">0</span></label>
+            <input type="range" id="posY" min="-3" max="5" step="0.05" value="0">
+          </div>
+          <div class="slider-group">
+            <label>Posição Z <span id="posZVal">0</span></label>
+            <input type="range" id="posZ" min="-5" max="5" step="0.05" value="0">
+          </div>
+          <div class="slider-group">
+            <label>Escala <span id="scaleVal">1</span></label>
+            <input type="range" id="scale" min="0.1" max="10" step="0.1" value="1">
+          </div>
+          <div class="slider-group">
+            <label>Rotação X <span id="rotXVal">0</span></label>
+            <input type="range" id="rotX" min="-180" max="180" step="5" value="0">
+          </div>
+          <div class="slider-group">
+            <label>Rotação Y <span id="rotYVal">0</span></label>
+            <input type="range" id="rotY" min="-180" max="180" step="5" value="0">
+          </div>
+          <div class="slider-group">
+            <label>Rotação Z <span id="rotZVal">0</span></label>
+            <input type="range" id="rotZ" min="-180" max="180" step="5" value="0">
+          </div>
+          <div class="slider-group" id="textoConfig" style="display: none;">
+            <label>Texto</label>
+            <input type="text" id="textoContent" style="width: 100%; padding: 8px; border-radius: 5px; border: none;">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Botões de ação -->
+      <button class="btn" id="salvarProjetoBtn">💾 SALVAR PROJETO</button>
+      <button class="btn btn-secondary" id="exportarBtn">📋 Copiar Configuração</button>
+    </div>
+    
+    <!-- Área de Preview AR -->
+    <div class="preview-area">
+      <a-scene
+        id="arScene"
+        mindar-image="imageTargetSrc: ; autoStart: true;"
+        vr-mode-ui="enabled: false"
+        device-orientation-permission-ui="enabled: true"
+        embedded>
+        
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+        
+        <!-- Target principal -->
+        <a-entity mindar-image-target="targetIndex: 0" id="targetPrincipal">
+          <!-- Elementos serão adicionados aqui dinamicamente -->
+        </a-entity>
+        
+        <a-light type="ambient" intensity="0.5"></a-light>
+        <a-light type="directional" intensity="1" position="1 2 1"></a-light>
+      </a-scene>
+    </div>
+  </div>
 
+  <input type="file" id="fileInput" style="display: none;" accept="">
+  
+  <script>
+    // ============================================
+    // ESTADO DO EDITOR
+    // ============================================
+    let elementos = [];
+    let nextId = 1;
+    let selectedElementId = null;
+    let targetFile = null;
+    
+    // Referências DOM
+    const targetContainer = document.getElementById('targetPrincipal');
+    const elementosListDiv = document.getElementById('elementosList');
+    const fileInput = document.getElementById('fileInput');
+    const arScene = document.getElementById('arScene');
+    
+    // ============================================
+    // FUNÇÕES DE RENDERIZAÇÃO
+    // ============================================
+    
+    function renderElementosList() {
+      if (elementos.length === 0) {
+        elementosListDiv.innerHTML = '<div style="text-align: center; color: #aaa;">Nenhum elemento na cena</div>';
+        return;
+      }
+      
+      elementosListDiv.innerHTML = elementos.map(el => `
+        <div class="elemento-item ${selectedElementId === el.id ? 'selected' : ''}" onclick="selectElement(${el.id})">
+          <div class="elemento-icon">${el.icon}</div>
+          <div class="elemento-info">
+            <div><strong>${el.nome}</strong></div>
+            <div style="font-size: 10px;">${el.tipo}</div>
+          </div>
+          <div class="elemento-actions">
+            <button onclick="event.stopPropagation(); deleteElement(${el.id})">🗑️</button>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function renderCena() {
+      // Limpar container
+      targetContainer.innerHTML = '';
+      
+      // Adicionar cada elemento
+      elementos.forEach(el => {
+        const entity = document.createElement('a-entity');
+        entity.setAttribute('id', `elem-${el.id}`);
+        
+        // Configurar transformações
+        entity.setAttribute('position', `${el.posX} ${el.posY} ${el.posZ}`);
+        entity.setAttribute('scale', `${el.scale} ${el.scale} ${el.scale}`);
+        entity.setAttribute('rotation', `${el.rotX} ${el.rotY} ${el.rotZ}`);
+        
+        // Adicionar conteúdo baseado no tipo
+        if (el.tipo === 'modelo3d' && el.url) {
+          entity.setAttribute('gltf-model', el.url);
+          entity.setAttribute('animation-mixer', '');
+        } else if (el.tipo === 'video' && el.url) {
+          entity.setAttribute('video', `src: ${el.url}; loop: true; autoplay: true`);
+          entity.setAttribute('material', 'shader: standard; transparent: true');
+          entity.setAttribute('geometry', 'primitive: plane; width: 2; height: 1.5');
+        } else if (el.tipo === 'imagem' && el.url) {
+          entity.setAttribute('image', `src: ${el.url}`);
+          entity.setAttribute('geometry', 'primitive: plane; width: 2; height: 2');
+        } else if (el.tipo === 'texto') {
+          entity.setAttribute('text', `value: ${el.texto || 'Texto'}; color: white; align: center; width: 3`);
+        }
+        
+        targetContainer.appendChild(entity);
+      });
+    }
+    
+    // ============================================
+    // FUNÇÕES DE CRIAÇÃO DE ELEMENTOS
+    // ============================================
+    
+    function addElemento(tipo, nome, icon, file = null, texto = '') {
+      const id = nextId++;
+      
+      const novoElemento = {
+        id: id,
+        tipo: tipo,
+        nome: nome,
+        icon: icon,
+        url: file ? URL.createObjectURL(file) : null,
+        file: file,
+        texto: texto,
+        posX: 0,
+        posY: 0,
+        posZ: 0,
+        scale: 1,
+        rotX: 0,
+        rotY: 0,
+        rotZ: 0
+      };
+      
+      elementos.push(novoElemento);
+      renderElementosList();
+      renderCena();
+      selectElement(id);
+    }
+    
+    function deleteElement(id) {
+      elementos = elementos.filter(el => el.id !== id);
+      if (selectedElementId === id) {
+        selectedElementId = null;
+        document.getElementById('selectedNome').innerText = 'Nenhum selecionado';
+        document.getElementById('configControls').style.display = 'none';
+      }
+      renderElementosList();
+      renderCena();
+    }
+    
+    function selectElement(id) {
+      selectedElementId = id;
+      const el = elementos.find(e => e.id === id);
+      
+      if (el) {
+        document.getElementById('selectedNome').innerText = el.nome;
+        document.getElementById('configControls').style.display = 'block';
+        
+        // Atualizar sliders
+        document.getElementById('posX').value = el.posX;
+        document.getElementById('posY').value = el.posY;
+        document.getElementById('posZ').value = el.posZ;
+        document.getElementById('scale').value = el.scale;
+        document.getElementById('rotX').value = el.rotX;
+        document.getElementById('rotY').value = el.rotY;
+        document.getElementById('rotZ').value = el.rotZ;
+        
+        document.getElementById('posXVal').innerText = el.posX;
+        document.getElementById('posYVal').innerText = el.posY;
+        document.getElementById('posZVal').innerText = el.posZ;
+        document.getElementById('scaleVal').innerText = el.scale;
+        document.getElementById('rotXVal').innerText = el.rotX;
+        document.getElementById('rotYVal').innerText = el.rotY;
+        document.getElementById('rotZVal').innerText = el.rotZ;
+        
+        // Configurações específicas
+        if (el.tipo === 'texto') {
+          document.getElementById('textoConfig').style.display = 'block';
+          document.getElementById('textoContent').value = el.texto || '';
+        } else {
+          document.getElementById('textoConfig').style.display = 'none';
+        }
+      }
+      
+      renderElementosList();
+    }
+    
+    function updateSelectedElement() {
+      if (selectedElementId === null) return;
+      
+      const el = elementos.find(e => e.id === selectedElementId);
+      if (el) {
+        el.posX = parseFloat(document.getElementById('posX').value);
+        el.posY = parseFloat(document.getElementById('posY').value);
+        el.posZ = parseFloat(document.getElementById('posZ').value);
+        el.scale = parseFloat(document.getElementById('scale').value);
+        el.rotX = parseFloat(document.getElementById('rotX').value);
+        el.rotY = parseFloat(document.getElementById('rotY').value);
+        el.rotZ = parseFloat(document.getElementById('rotZ').value);
+        
+        if (el.tipo === 'texto') {
+          el.texto = document.getElementById('textoContent').value;
+        }
+        
+        document.getElementById('posXVal').innerText = el.posX;
+        document.getElementById('posYVal').innerText = el.posY;
+        document.getElementById('posZVal').innerText = el.posZ;
+        document.getElementById('scaleVal').innerText = el.scale;
+        document.getElementById('rotXVal').innerText = el.rotX;
+        document.getElementById('rotYVal').innerText = el.rotY;
+        document.getElementById('rotZVal').innerText = el.rotZ;
+        
+        renderCena();
+      }
+    }
+    
+    // ============================================
+    // EVENTOS DOS SLIDERS
+    // ============================================
+    document.getElementById('posX').addEventListener('input', updateSelectedElement);
+    document.getElementById('posY').addEventListener('input', updateSelectedElement);
+    document.getElementById('posZ').addEventListener('input', updateSelectedElement);
+    document.getElementById('scale').addEventListener('input', updateSelectedElement);
+    document.getElementById('rotX').addEventListener('input', updateSelectedElement);
+    document.getElementById('rotY').addEventListener('input', updateSelectedElement);
+    document.getElementById('rotZ').addEventListener('input', updateSelectedElement);
+    document.getElementById('textoContent').addEventListener('input', updateSelectedElement);
+    
+    // ============================================
+    // UPLOAD DE ARQUIVOS
+    // ============================================
+    let pendingType = null;
+    
+    function triggerUpload(tipo) {
+      pendingType = tipo;
+      let accept = '';
+      if (tipo === 'modelo3d') accept = '.glb,.gltf';
+      if (tipo === 'video') accept = '.mp4';
+      if (tipo === 'imagem') accept = '.png,.jpg,.jpeg';
+      if (tipo === 'audio') accept = '.mp3';
+      
+      fileInput.accept = accept;
+      fileInput.click();
+    }
+    
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file || !pendingType) return;
+      
+      if (pendingType === 'modelo3d') {
+        addElemento('modelo3d', file.name, '📦', file);
+        document.getElementById('modeloInfo').innerHTML = `✅ ${file.name}`;
+      } else if (pendingType === 'video') {
+        addElemento('video', file.name, '🎬', file);
+        document.getElementById('videoInfo').innerHTML = `✅ ${file.name}`;
+      } else if (pendingType === 'imagem') {
+        addElemento('imagem', file.name, '🖼️', file);
+        document.getElementById('imagemInfo').innerHTML = `✅ ${file.name}`;
+      } else if (pendingType === 'audio') {
+        // Áudio é tratado separadamente
+        document.getElementById('audioInfo').innerHTML = `✅ ${file.name}`;
+        alert('Áudio adicionado! Ele tocará quando o target for encontrado.');
+      }
+      
+      fileInput.value = '';
+      pendingType = null;
+    });
+    
+    document.getElementById('addModeloBtn').addEventListener('click', () => triggerUpload('modelo3d'));
+    document.getElementById('addVideoBtn').addEventListener('click', () => triggerUpload('video'));
+    document.getElementById('addImagemBtn').addEventListener('click', () => triggerUpload('imagem'));
+    document.getElementById('addAudioBtn').addEventListener('click', () => triggerUpload('audio'));
+    
+    document.getElementById('addTextoBtn').addEventListener('click', () => {
+      const texto = prompt('Digite o texto que aparecerá:');
+      if (texto) {
+        addElemento('texto', texto.substring(0, 20), '📝', null, texto);
+      }
+    });
+    
+    document.getElementById('limparElementosBtn').addEventListener('click', () => {
+      if (confirm('Tem certeza? Todos os elementos serão removidos.')) {
+        elementos = [];
+        selectedElementId = null;
+        renderElementosList();
+        renderCena();
+        document.getElementById('selectedNome').innerText = 'Nenhum selecionado';
+        document.getElementById('configControls').style.display = 'none';
+      }
+    });
+    
+    // ============================================
+    // UPLOAD DO TARGET
+    // ============================================
+    function uploadTarget() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.mind';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          targetFile = file;
+          const targetUrl = URL.createObjectURL(file);
+          arScene.setAttribute('mindar-image', `imageTargetSrc: ${targetUrl}; autoStart: true;`);
+          alert(`✅ Target "${file.name}" carregado! Aponte a câmera.`);
+        }
+      };
+      input.click();
+    }
+    
+    // Botão para carregar target (adicione no painel)
+    const targetBtn = document.createElement('button');
+    targetBtn.className = 'btn btn-secondary';
+    targetBtn.innerHTML = '🎯 Carregar Target .mind';
+    targetBtn.style.marginTop = '10px';
+    targetBtn.onclick = uploadTarget;
+    document.querySelector('.control-panel').appendChild(targetBtn);
+    
+    // ============================================
+    // SALVAR PROJETO
+    // ============================================
+    document.getElementById('salvarProjetoBtn').addEventListener('click', () => {
+      if (!targetFile) {
+        alert('❌ Carregue um target .mind primeiro!');
+        return;
+      }
+      
+      const projectId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+      
+      const projeto = {
+        id: projectId,
+        nome: 'Projeto AR Personalizado',
+        data: new Date().toISOString(),
+        target: { name: targetFile.name },
+        elementos: elementos.map(el => ({
+          id: el.id,
+          tipo: el.tipo,
+          nome: el.nome,
+          texto: el.texto,
+          posX: el.posX,
+          posY: el.posY,
+          posZ: el.posZ,
+          scale: el.scale,
+          rotX: el.rotX,
+          rotY: el.rotY,
+          rotZ: el.rotZ,
+          // Salvar nome do arquivo para referência
+          arquivo: el.file ? el.file.name : null
+        }))
+      };
+      
+      const projetos = JSON.parse(localStorage.getItem('ar_projetos') || '[]');
+      projetos.push(projeto);
+      localStorage.setItem('ar_projetos', JSON.stringify(projetos));
+      
+      const baseUrl = window.location.origin + window.location.pathname.replace('editor.html', '');
+      const projectUrl = `${baseUrl}ver.html?id=${projectId}`;
+      
+      alert(`✅ Projeto salvo!\n\nLink: ${projectUrl}\n\nGuarde este link para compartilhar!`);
+      
+      // Abrir o link em nova aba
+      window.open(projectUrl, '_blank');
+    });
+    
+    // ============================================
+    // EXPORTAR CONFIGURAÇÃO
+    // ============================================
+    document.getElementById('exportarBtn').addEventListener('click', () => {
+      const config = {
+        elementos: elementos.map(el => ({
+          tipo: el.tipo,
+          posX: el.posX,
+          posY: el.posY,
+          posZ: el.posZ,
+          scale: el.scale,
+          rotX: el.rotX,
+          rotY: el.rotY,
+          rotZ: el.rotZ
+        }))
+      };
+      
+      navigator.clipboard.writeText(JSON.stringify(config, null, 2));
+      alert('✅ Configuração copiada!');
+    });
+    
+    // ============================================
+    // ABAS
+    // ============================================
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+      });
+    });
+    
+    // Mensagem inicial
+    console.log('Editor AR carregado! Carregue um target .mind para começar.');
+  </script>
+</body>
+</html>
