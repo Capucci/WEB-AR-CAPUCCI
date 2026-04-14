@@ -3,249 +3,377 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Editor AR - Versão Simplificada</title>
+  <title>AR CapCreator - Editor Profissional</title>
   
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
   
   <style>
-    body { margin: 0; overflow: hidden; font-family: Arial; }
-    .painel {
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      background: rgba(0,0,0,0.8);
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #1a1a2e;
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+    
+    /* Barra lateral */
+    .sidebar {
+      width: 300px;
+      background: #16213e;
       color: white;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #0f3460;
+    }
+    
+    .sidebar-header {
+      padding: 20px;
+      background: #0f3460;
+      border-bottom: 1px solid #e94560;
+    }
+    
+    .sidebar-header h2 {
+      color: #e94560;
+      font-size: 18px;
+    }
+    
+    .sidebar-header p {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 5px;
+    }
+    
+    .upload-section {
+      padding: 20px;
+      border-bottom: 1px solid #0f3460;
+    }
+    
+    .upload-area {
+      border: 2px dashed #0f3460;
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      margin-bottom: 15px;
+      transition: all 0.3s;
+    }
+    
+    .upload-area:hover {
+      border-color: #e94560;
+      background: #0f3460;
+    }
+    
+    .upload-area.has-file {
+      border-color: #28a745;
+      background: #1a3a1a;
+    }
+    
+    .file-info {
+      font-size: 11px;
+      color: #aaa;
+      margin-top: 5px;
+    }
+    
+    .controls-section {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    
+    .control-group {
+      background: #0f3460;
       padding: 15px;
       border-radius: 10px;
-      z-index: 1000;
-      max-width: 280px;
-      font-size: 12px;
-      pointer-events: auto;
+      margin-bottom: 15px;
     }
-    .painel button {
+    
+    .control-group h3 {
+      color: #e94560;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+    
+    .slider-item {
+      margin-bottom: 12px;
+    }
+    
+    .slider-item label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+    }
+    
+    input[type=range] {
+      width: 100%;
+      margin-top: 5px;
+      background: #1a1a2e;
+      height: 4px;
+      border-radius: 2px;
+    }
+    
+    .coord-group {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .coord-input {
+      text-align: center;
+    }
+    
+    .coord-input label {
+      display: block;
+      font-size: 11px;
+      margin-bottom: 5px;
+    }
+    
+    .coord-input input {
+      width: 100%;
+      padding: 6px;
+      background: #1a1a2e;
+      border: 1px solid #0f3460;
+      color: white;
+      border-radius: 5px;
+      text-align: center;
+    }
+    
+    .btn {
       background: #e94560;
       color: white;
       border: none;
-      padding: 8px 12px;
-      margin: 5px;
-      border-radius: 5px;
+      padding: 10px;
+      border-radius: 8px;
       cursor: pointer;
-    }
-    .painel input {
       width: 100%;
-      margin: 5px 0;
-      padding: 5px;
+      margin-top: 10px;
+      font-weight: bold;
     }
-    .slider {
+    
+    .btn-success {
+      background: #28a745;
+    }
+    
+    .btn-secondary {
+      background: #0f3460;
+    }
+    
+    /* Preview AR */
+    .preview-area {
+      flex: 1;
+      position: relative;
+      background: #000;
+    }
+    
+    a-scene {
       width: 100%;
-      margin: 5px 0;
+      height: 100%;
     }
-    .info {
-      position: fixed;
+    
+    .info-bar {
+      position: absolute;
       bottom: 20px;
       left: 20px;
       background: rgba(0,0,0,0.7);
       color: white;
       padding: 8px 15px;
       border-radius: 20px;
-      z-index: 1000;
+      font-size: 12px;
+      z-index: 100;
+    }
+    
+    .result-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+    }
+    
+    .result-card {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+      max-width: 400px;
+    }
+    
+    .result-card .url {
+      word-break: break-all;
+      background: #f0f0f0;
+      padding: 10px;
+      border-radius: 5px;
+      margin: 15px 0;
       font-size: 12px;
     }
   </style>
 </head>
 <body>
-  <div class="painel">
-    <h3>🎮 Editor AR</h3>
-    
-    <div>
-      <button id="btnTarget">1️⃣ Carregar Target (.mind)</button>
-      <button id="btnModelo">2️⃣ Adicionar Modelo 3D</button>
-      <button id="btnVideo">3️⃣ Adicionar Vídeo</button>
-      <button id="btnImagem">4️⃣ Adicionar Imagem</button>
-      <button id="btnTexto">5️⃣ Adicionar Texto</button>
-      <button id="btnSalvar" style="background: #28a745;">💾 SALVAR PROJETO</button>
-      <button id="btnLimpar">🗑️ Limpar</button>
+  <div class="container">
+    <!-- Barra Lateral -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h2>🎮 EDITOR AR</h2>
+        <p>Carregue o target e adicione elementos</p>
+      </div>
+      
+      <div class="upload-section">
+        <div class="upload-area" id="uploadTargetBtn">
+          <div style="font-size: 32px;">🎯</div>
+          <div><strong>1. Target (.mind)</strong></div>
+          <div class="file-info" id="targetInfo">Clique para carregar</div>
+        </div>
+        
+        <div class="upload-area" id="uploadModeloBtn">
+          <div style="font-size: 32px;">📦</div>
+          <div><strong>2. Modelo 3D (.glb)</strong></div>
+          <div class="file-info" id="modeloInfo">Clique para adicionar</div>
+        </div>
+        
+        <div class="upload-area" id="uploadAudioBtn">
+          <div style="font-size: 32px;">🎵</div>
+          <div><strong>3. Áudio (.mp3)</strong></div>
+          <div class="file-info" id="audioInfo">Opcional</div>
+        </div>
+      </div>
+      
+      <div class="controls-section">
+        <div class="control-group">
+          <h3>📍 POSIÇÃO</h3>
+          <div class="coord-group">
+            <div class="coord-input"><label>X</label><input type="number" id="posX" step="0.05" value="0"></div>
+            <div class="coord-input"><label>Y</label><input type="number" id="posY" step="0.05" value="0"></div>
+            <div class="coord-input"><label>Z</label><input type="number" id="posZ" step="0.05" value="0"></div>
+          </div>
+        </div>
+        
+        <div class="control-group">
+          <h3>🔄 ROTAÇÃO</h3>
+          <div class="coord-group">
+            <div class="coord-input"><label>X</label><input type="number" id="rotX" step="5" value="0"></div>
+            <div class="coord-input"><label>Y</label><input type="number" id="rotY" step="5" value="0"></div>
+            <div class="coord-input"><label>Z</label><input type="number" id="rotZ" step="5" value="0"></div>
+          </div>
+        </div>
+        
+        <div class="control-group">
+          <h3>📏 ESCALA</h3>
+          <div class="slider-item">
+            <label>Tamanho: <span id="scaleVal">1.0</span></label>
+            <input type="range" id="scale" min="0.1" max="10" step="0.1" value="1">
+          </div>
+        </div>
+        
+        <div class="control-group">
+          <h3>🔊 ÁUDIO</h3>
+          <select id="audioMode" style="width: 100%; padding: 8px; background: #1a1a2e; color: white; border: 1px solid #0f3460; border-radius: 5px;">
+            <option value="loop">Tocar em Looping</option>
+            <option value="once">Tocar uma só vez</option>
+          </select>
+        </div>
+        
+        <button class="btn" id="btnSalvarProjeto">💾 SALVAR PROJETO</button>
+        <button class="btn btn-secondary" id="btnLimpar">🗑️ Limpar Elementos</button>
+      </div>
     </div>
     
-    <div style="margin-top: 10px; border-top: 1px solid #444; padding-top: 10px;">
-      <div>📐 Ajustes do elemento selecionado:</div>
-      <div>Posição X: <span id="valX">0</span> <input type="range" id="sliderX" min="-3" max="3" step="0.05" value="0" class="slider"></div>
-      <div>Posição Y: <span id="valY">0</span> <input type="range" id="sliderY" min="-2" max="4" step="0.05" value="0" class="slider"></div>
-      <div>Posição Z: <span id="valZ">0</span> <input type="range" id="sliderZ" min="-3" max="3" step="0.05" value="0" class="slider"></div>
-      <div>Escala: <span id="valScale">1</span> <input type="range" id="sliderScale" min="0.1" max="10" step="0.1" value="1" class="slider"></div>
-      <div>Rotação X: <span id="valRotX">0</span> <input type="range" id="sliderRotX" min="-180" max="180" step="5" value="0" class="slider"></div>
-      <div>Rotação Y: <span id="valRotY">0</span> <input type="range" id="sliderRotY" min="-180" max="180" step="5" value="0" class="slider"></div>
+    <!-- Preview AR -->
+    <div class="preview-area">
+      <div class="info-bar" id="infoBar">🔍 Aguardando target...</div>
+      
+      <a-scene
+        id="arScene"
+        mindar-image="imageTargetSrc: ; autoStart: true;"
+        vr-mode-ui="enabled: false"
+        device-orientation-permission-ui="enabled: true"
+        embedded>
+        
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+        <a-entity mindar-image-target="targetIndex: 0" id="targetContainer"></a-entity>
+        <a-light type="ambient" intensity="0.5"></a-light>
+        <a-light type="directional" intensity="1" position="1 2 1"></a-light>
+      </a-scene>
     </div>
-    
-    <div id="status" style="margin-top: 10px; color: #aaa; font-size: 11px;">Aguardando...</div>
   </div>
   
-  <div class="info" id="info">🔍 Aponte para o target</div>
-  
-  <a-scene
-    id="scene"
-    mindar-image="imageTargetSrc: ; autoStart: true;"
-    vr-mode-ui="enabled: false"
-    device-orientation-permission-ui="enabled: true"
-    embedded>
-    
-    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-    
-    <a-entity mindar-image-target="targetIndex: 0" id="targetContainer">
-      <!-- Elementos serão adicionados aqui -->
-    </a-entity>
-    
-    <a-light type="ambient" intensity="0.5"></a-light>
-    <a-light type="directional" intensity="1" position="1 2 1"></a-light>
-  </a-scene>
+  <!-- Modal de Resultado -->
+  <div class="result-modal" id="resultModal">
+    <div class="result-card">
+      <h2 style="color: #28a745;">✅ PROJETO SALVO!</h2>
+      <div class="url" id="resultUrl"></div>
+      <div id="resultQr"></div>
+      <button onclick="document.getElementById('resultModal').style.display='none'" style="margin-top: 15px; padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px;">Fechar</button>
+    </div>
+  </div>
 
   <script>
-    // ============================================
-    // VARIÁVEIS
-    // ============================================
-    let elementos = [];
-    let nextId = 1;
-    let elementoSelecionado = null;
-    let targetFile = null;
-    
-    const targetContainer = document.getElementById('targetContainer');
-    const scene = document.getElementById('scene');
-    const infoDiv = document.getElementById('info');
-    const statusDiv = document.getElementById('status');
-    
-    // ============================================
-    // FUNÇÕES
-    // ============================================
-    
-    function atualizarStatus(msg) {
-      statusDiv.innerHTML = msg;
-      console.log(msg);
-    }
-    
-    function adicionarElemento(tipo, nome, icon, file = null, texto = '') {
-      const id = nextId++;
-      
-      const elemento = {
-        id: id,
-        tipo: tipo,
-        nome: nome,
-        icon: icon,
-        url: file ? URL.createObjectURL(file) : null,
-        file: file,
-        texto: texto,
-        posX: 0,
-        posY: 0,
-        posZ: 0,
+    // Dados do projeto
+    let projetoAtual = {
+      target: null,
+      modelo: null,
+      audio: null,
+      config: {
+        posX: 0, posY: 0, posZ: 0,
+        rotX: 0, rotY: 0, rotZ: 0,
         scale: 1,
-        rotX: 0,
-        rotY: 0,
-        rotZ: 0
-      };
-      
-      elementos.push(elemento);
-      renderizarCena();
-      selecionarElemento(id);
-      atualizarStatus(`✅ ${nome} adicionado!`);
-    }
+        audioMode: 'loop'
+      }
+    };
+    
+    // Referências
+    const targetContainer = document.getElementById('targetContainer');
+    const arScene = document.getElementById('arScene');
+    const infoBar = document.getElementById('infoBar');
+    
+    // ============================================
+    // FUNÇÕES DE RENDERIZAÇÃO
+    // ============================================
     
     function renderizarCena() {
       targetContainer.innerHTML = '';
       
-      elementos.forEach(el => {
-        const entity = document.createElement('a-entity');
-        entity.setAttribute('id', `elem-${el.id}`);
-        entity.setAttribute('position', `${el.posX} ${el.posY} ${el.posZ}`);
-        entity.setAttribute('scale', `${el.scale} ${el.scale} ${el.scale}`);
-        entity.setAttribute('rotation', `${el.rotX} ${el.rotY} ${el.rotZ}`);
-        
-        if (el.tipo === 'modelo3d' && el.url) {
-          entity.setAttribute('gltf-model', el.url);
-          entity.setAttribute('animation-mixer', '');
-        } else if (el.tipo === 'video' && el.url) {
-          entity.setAttribute('video', `src: ${el.url}; loop: true; autoplay: true`);
-          entity.setAttribute('material', 'shader: standard');
-          entity.setAttribute('geometry', 'primitive: plane; width: 2; height: 1.5');
-        } else if (el.tipo === 'imagem' && el.url) {
-          entity.setAttribute('image', `src: ${el.url}`);
-          entity.setAttribute('geometry', 'primitive: plane; width: 2; height: 2');
-        } else if (el.tipo === 'texto') {
-          entity.setAttribute('text', `value: ${el.texto}; color: white; align: center; width: 3`);
-        }
-        
-        targetContainer.appendChild(entity);
-      });
+      if (!projetoAtual.modelo) return;
+      
+      const entity = document.createElement('a-entity');
+      entity.setAttribute('position', `${projetoAtual.config.posX} ${projetoAtual.config.posY} ${projetoAtual.config.posZ}`);
+      entity.setAttribute('scale', `${projetoAtual.config.scale} ${projetoAtual.config.scale} ${projetoAtual.config.scale}`);
+      entity.setAttribute('rotation', `${projetoAtual.config.rotX} ${projetoAtual.config.rotY} ${projetoAtual.config.rotZ}`);
+      entity.setAttribute('gltf-model', URL.createObjectURL(projetoAtual.modelo.file));
+      entity.setAttribute('animation-mixer', '');
+      
+      targetContainer.appendChild(entity);
     }
     
-    function selecionarElemento(id) {
-      const el = elementos.find(e => e.id === id);
-      if (!el) return;
+    function atualizarConfig() {
+      projetoAtual.config.posX = parseFloat(document.getElementById('posX').value);
+      projetoAtual.config.posY = parseFloat(document.getElementById('posY').value);
+      projetoAtual.config.posZ = parseFloat(document.getElementById('posZ').value);
+      projetoAtual.config.rotX = parseFloat(document.getElementById('rotX').value);
+      projetoAtual.config.rotY = parseFloat(document.getElementById('rotY').value);
+      projetoAtual.config.rotZ = parseFloat(document.getElementById('rotZ').value);
+      projetoAtual.config.scale = parseFloat(document.getElementById('scale').value);
+      projetoAtual.config.audioMode = document.getElementById('audioMode').value;
       
-      elementoSelecionado = el;
-      
-      document.getElementById('sliderX').value = el.posX;
-      document.getElementById('sliderY').value = el.posY;
-      document.getElementById('sliderZ').value = el.posZ;
-      document.getElementById('sliderScale').value = el.scale;
-      document.getElementById('sliderRotX').value = el.rotX;
-      document.getElementById('sliderRotY').value = el.rotY;
-      
-      document.getElementById('valX').innerText = el.posX;
-      document.getElementById('valY').innerText = el.posY;
-      document.getElementById('valZ').innerText = el.posZ;
-      document.getElementById('valScale').innerText = el.scale;
-      document.getElementById('valRotX').innerText = el.rotX;
-      document.getElementById('valRotY').innerText = el.rotY;
-      
-      atualizarStatus(`🔧 Editando: ${el.nome}`);
-    }
-    
-    function atualizarElementoSelecionado() {
-      if (!elementoSelecionado) return;
-      
-      elementoSelecionado.posX = parseFloat(document.getElementById('sliderX').value);
-      elementoSelecionado.posY = parseFloat(document.getElementById('sliderY').value);
-      elementoSelecionado.posZ = parseFloat(document.getElementById('sliderZ').value);
-      elementoSelecionado.scale = parseFloat(document.getElementById('sliderScale').value);
-      elementoSelecionado.rotX = parseFloat(document.getElementById('sliderRotX').value);
-      elementoSelecionado.rotY = parseFloat(document.getElementById('sliderRotY').value);
-      
-      document.getElementById('valX').innerText = elementoSelecionado.posX;
-      document.getElementById('valY').innerText = elementoSelecionado.posY;
-      document.getElementById('valZ').innerText = elementoSelecionado.posZ;
-      document.getElementById('valScale').innerText = elementoSelecionado.scale;
-      document.getElementById('valRotX').innerText = elementoSelecionado.rotX;
-      document.getElementById('valRotY').innerText = elementoSelecionado.rotY;
+      document.getElementById('scaleVal').innerText = projetoAtual.config.scale;
       
       renderizarCena();
-      selecionarElemento(elementoSelecionado.id);
-    }
-    
-    function limparElementos() {
-      if (confirm('Remover todos os elementos?')) {
-        elementos = [];
-        elementoSelecionado = null;
-        renderizarCena();
-        atualizarStatus('🗑️ Todos os elementos removidos');
-      }
     }
     
     // ============================================
-    // UPLOAD DE ARQUIVOS
+    // FUNÇÕES DE UPLOAD
     // ============================================
-    function uploadArquivo(tipo, accept, nomePadrao, icon) {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = accept;
-      input.onchange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          adicionarElemento(tipo, file.name, icon, file);
-        }
-      };
-      input.click();
-    }
     
     function uploadTarget() {
       const input = document.createElement('input');
@@ -254,14 +382,47 @@
       input.onchange = (e) => {
         const file = e.target.files[0];
         if (file) {
-          targetFile = file;
+          projetoAtual.target = { name: file.name, file: file };
+          document.getElementById('targetInfo').innerHTML = `✅ ${file.name}`;
+          document.getElementById('uploadTargetBtn').classList.add('has-file');
+          
           const url = URL.createObjectURL(file);
-          scene.setAttribute('mindar-image', `imageTargetSrc: ${url}; autoStart: true;`);
-          atualizarStatus(`🎯 Target carregado: ${file.name}`);
-          infoDiv.innerHTML = '✅ Target carregado! Aponte a câmera';
+          arScene.setAttribute('mindar-image', `imageTargetSrc: ${url}; autoStart: true;`);
+          infoBar.innerHTML = '✅ Target carregado! Aponte a câmera';
           setTimeout(() => {
-            infoDiv.innerHTML = '🔍 Aponte para o target';
+            infoBar.innerHTML = '🔍 Aponte a câmera para o target';
           }, 3000);
+        }
+      };
+      input.click();
+    }
+    
+    function uploadModelo() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.glb,.gltf';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          projetoAtual.modelo = { name: file.name, file: file };
+          document.getElementById('modeloInfo').innerHTML = `✅ ${file.name}`;
+          document.getElementById('uploadModeloBtn').classList.add('has-file');
+          renderizarCena();
+        }
+      };
+      input.click();
+    }
+    
+    function uploadAudio() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.mp3';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          projetoAtual.audio = { name: file.name, file: file };
+          document.getElementById('audioInfo').innerHTML = `✅ ${file.name}`;
+          document.getElementById('uploadAudioBtn').classList.add('has-file');
         }
       };
       input.click();
@@ -270,9 +431,15 @@
     // ============================================
     // SALVAR PROJETO
     // ============================================
+    
     function salvarProjeto() {
-      if (!targetFile) {
-        alert('❌ Carregue um target .mind primeiro!');
+      if (!projetoAtual.target) {
+        alert('❌ Carregue um target (.mind) primeiro!');
+        return;
+      }
+      
+      if (!projetoAtual.modelo) {
+        alert('❌ Carregue um modelo 3D (.glb) primeiro!');
         return;
       }
       
@@ -282,19 +449,10 @@
         id: projectId,
         nome: 'Projeto AR',
         data: new Date().toISOString(),
-        target: { name: targetFile.name },
-        elementos: elementos.map(el => ({
-          tipo: el.tipo,
-          nome: el.nome,
-          texto: el.texto,
-          posX: el.posX,
-          posY: el.posY,
-          posZ: el.posZ,
-          scale: el.scale,
-          rotX: el.rotX,
-          rotY: el.rotY,
-          rotZ: el.rotZ
-        }))
+        target: { name: projetoAtual.target.name },
+        modelo: { name: projetoAtual.modelo.name },
+        audio: projetoAtual.audio ? { name: projetoAtual.audio.name } : null,
+        config: projetoAtual.config
       };
       
       const projetos = JSON.parse(localStorage.getItem('ar_projetos') || '[]');
@@ -304,48 +462,47 @@
       const baseUrl = window.location.origin + window.location.pathname.replace('editor.html', '');
       const projectUrl = `${baseUrl}ver.html?id=${projectId}`;
       
-      alert(`✅ Projeto salvo!\n\nLink: ${projectUrl}\n\nCopie este link para compartilhar!`);
-      navigator.clipboard.writeText(projectUrl);
+      document.getElementById('resultUrl').innerHTML = projectUrl;
+      const qrUrl = `https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=${encodeURIComponent(projectUrl)}&choe=UTF-8`;
+      document.getElementById('resultQr').innerHTML = `<img src="${qrUrl}" style="max-width: 200px;">`;
+      document.getElementById('resultModal').style.display = 'flex';
       
-      // Abrir em nova aba
-      window.open(projectUrl, '_blank');
+      navigator.clipboard.writeText(projectUrl);
+    }
+    
+    function limparElementos() {
+      if (confirm('Remover o modelo 3D?')) {
+        projetoAtual.modelo = null;
+        projetoAtual.audio = null;
+        document.getElementById('modeloInfo').innerHTML = 'Clique para adicionar';
+        document.getElementById('audioInfo').innerHTML = 'Opcional';
+        document.getElementById('uploadModeloBtn').classList.remove('has-file');
+        document.getElementById('uploadAudioBtn').classList.remove('has-file');
+        targetContainer.innerHTML = '';
+      }
     }
     
     // ============================================
-    // EVENTOS DOS BOTÕES
+    // EVENTOS
     // ============================================
-    document.getElementById('btnTarget').onclick = uploadTarget;
-    document.getElementById('btnModelo').onclick = () => uploadArquivo('modelo3d', '.glb,.gltf', 'Modelo 3D', '📦');
-    document.getElementById('btnVideo').onclick = () => uploadArquivo('video', '.mp4', 'Vídeo', '🎬');
-    document.getElementById('btnImagem').onclick = () => uploadArquivo('imagem', '.png,.jpg,.jpeg', 'Imagem', '🖼️');
-    document.getElementById('btnTexto').onclick = () => {
-      const texto = prompt('Digite o texto:');
-      if (texto) {
-        adicionarElemento('texto', texto.substring(0, 20), '📝', null, texto);
-      }
-    };
-    document.getElementById('btnSalvar').onclick = salvarProjeto;
+    
+    document.getElementById('uploadTargetBtn').onclick = uploadTarget;
+    document.getElementById('uploadModeloBtn').onclick = uploadModelo;
+    document.getElementById('uploadAudioBtn').onclick = uploadAudio;
+    document.getElementById('btnSalvarProjeto').onclick = salvarProjeto;
     document.getElementById('btnLimpar').onclick = limparElementos;
     
-    // Eventos dos sliders
-    document.getElementById('sliderX').oninput = atualizarElementoSelecionado;
-    document.getElementById('sliderY').oninput = atualizarElementoSelecionado;
-    document.getElementById('sliderZ').oninput = atualizarElementoSelecionado;
-    document.getElementById('sliderScale').oninput = atualizarElementoSelecionado;
-    document.getElementById('sliderRotX').oninput = atualizarElementoSelecionado;
-    document.getElementById('sliderRotY').oninput = atualizarElementoSelecionado;
+    document.getElementById('posX').addEventListener('input', atualizarConfig);
+    document.getElementById('posY').addEventListener('input', atualizarConfig);
+    document.getElementById('posZ').addEventListener('input', atualizarConfig);
+    document.getElementById('rotX').addEventListener('input', atualizarConfig);
+    document.getElementById('rotY').addEventListener('input', atualizarConfig);
+    document.getElementById('rotZ').addEventListener('input', atualizarConfig);
+    document.getElementById('scale').addEventListener('input', atualizarConfig);
+    document.getElementById('audioMode').addEventListener('change', atualizarConfig);
     
-    // Evento de clique nos elementos da cena (para selecionar)
-    function setupClickHandlers() {
-      document.querySelectorAll('[mindar-image-target] a-entity').forEach(el => {
-        el.addEventListener('click', () => {
-          const id = parseInt(el.id.replace('elem-', ''));
-          selecionarElemento(id);
-        });
-      });
-    }
-    
-    atualizarStatus('✅ Editor carregado! Clique em "Carregar Target" para começar.');
+    // Inicializar
+    atualizarConfig();
   </script>
 </body>
 </html>
