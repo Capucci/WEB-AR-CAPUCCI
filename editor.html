@@ -3,424 +3,204 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Editor AR - Versão Simplificada</title>
-  
-  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-  
+  <title>AR CapCreator - Meus Projetos</title>
   <style>
-    body { margin: 0; overflow: hidden; font-family: Arial; }
-    .painel {
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      background: rgba(0,0,0,0.85);
-      color: white;
-      padding: 15px;
-      border-radius: 10px;
-      z-index: 1000;
-      width: 300px;
-      font-size: 12px;
-      pointer-events: auto;
-      max-height: 95vh;
-      overflow-y: auto;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
     }
-    .painel button {
-      background: #e94560;
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .btn {
+      background: white;
+      color: #667eea;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-editor {
+      background: #ff9800;
+      color: white;
+    }
+    .btn-criar {
+      background: white;
+      color: #667eea;
+    }
+    .projetos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 20px;
+    }
+    .projeto-card {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      transition: transform 0.3s;
+    }
+    .projeto-card:hover {
+      transform: translateY(-5px);
+    }
+    .projeto-nome {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .projeto-data {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+    .projeto-stats {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+      font-size: 12px;
+    }
+    .projeto-stats span {
+      background: #f0f0f0;
+      padding: 4px 8px;
+      border-radius: 5px;
+    }
+    .projeto-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-link { background: #667eea; color: white; padding: 8px; border: none; border-radius: 5px; cursor: pointer; flex: 1; }
+    .btn-qr { background: #28a745; color: white; padding: 8px; border: none; border-radius: 5px; cursor: pointer; flex: 1; }
+    .btn-ver { background: #17a2b8; color: white; padding: 8px; border: none; border-radius: 5px; cursor: pointer; flex: 1; text-align: center; text-decoration: none; display: inline-block; }
+    .vazio {
+      text-align: center;
+      color: white;
+      padding: 50px;
+    }
+    .info-box {
+      background: rgba(255,255,255,0.2);
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    .info-box p {
+      color: white;
+      margin-bottom: 10px;
+    }
+    .btn-info {
+      background: #ff9800;
       color: white;
       border: none;
-      padding: 10px 12px;
-      margin: 5px;
+      padding: 10px 20px;
       border-radius: 5px;
       cursor: pointer;
-      width: calc(100% - 10px);
-    }
-    .painel button:hover {
-      background: #ff6b8b;
-      transform: scale(1.02);
-    }
-    .painel .btn-target {
-      background: #ff9800;
-      font-size: 16px;
       font-weight: bold;
-    }
-    .painel .btn-salvar {
-      background: #28a745;
-    }
-    .painel .btn-limpar {
-      background: #dc3545;
-    }
-    .painel input {
-      width: 100%;
-      margin: 5px 0;
-      padding: 5px;
-    }
-    .slider {
-      width: 100%;
-      margin: 5px 0;
-    }
-    .info {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      background: rgba(0,0,0,0.7);
-      color: white;
-      padding: 8px 15px;
-      border-radius: 20px;
-      z-index: 1000;
-      font-size: 12px;
-    }
-    .target-status {
-      background: #333;
-      padding: 8px;
-      border-radius: 5px;
-      margin-bottom: 10px;
-      text-align: center;
-      font-size: 11px;
-    }
-    .target-status.ok {
-      background: #28a745;
-    }
-    hr {
-      margin: 10px 0;
-      border-color: #444;
     }
   </style>
 </head>
 <body>
-  <div class="painel">
-    <h3>🎮 EDITOR AR</h3>
-    
-    <!-- Status do Target -->
-    <div class="target-status" id="targetStatus">
-      ⚠️ Nenhum target carregado
+  <div class="container">
+    <div class="header">
+      <h1>🎯 AR CapCreator</h1>
+      <div>
+        <a href="editor.html" class="btn btn-editor">🎨 EDITOR VISUAL</a>
+        <a href="criar.html" class="btn btn-criar">+ Criar Novo Projeto</a>
+      </div>
     </div>
     
-    <!-- Botão principal para carregar target -->
-    <button class="btn-target" id="btnTarget">🎯 1. CARREGAR TARGET (.mind)</button>
-    <div style="font-size: 10px; color: #aaa; text-align: center; margin-bottom: 15px;">
-      Clique aqui, selecione o arquivo .mind e aponte a câmera
+    <div class="info-box">
+      <p>✨ <strong>EDITOR VISUAL</strong> - Crie projetos arrastando elementos em tempo real!</p>
+      <a href="editor.html" class="btn-info">🚀 ABRIR EDITOR VISUAL</a>
     </div>
     
-    <hr>
-    
-    <div style="font-weight: bold; margin-bottom: 5px;">2. ADICIONAR ELEMENTOS:</div>
-    <button id="btnModelo">📦 Adicionar Modelo 3D (.glb)</button>
-    <button id="btnVideo">🎬 Adicionar Vídeo (.mp4)</button>
-    <button id="btnImagem">🖼️ Adicionar Imagem (.png/.jpg)</button>
-    <button id="btnTexto">📝 Adicionar Texto</button>
-    
-    <hr>
-    
-    <div style="font-weight: bold; margin-bottom: 5px;">3. AJUSTES DO ELEMENTO SELECIONADO:</div>
-    <div id="selectedName" style="background: #e94560; padding: 5px; border-radius: 5px; text-align: center; margin-bottom: 10px;">
-      Nenhum elemento selecionado
-    </div>
-    
-    <div>Posição X: <span id="valX">0</span> <input type="range" id="sliderX" min="-3" max="3" step="0.05" value="0" class="slider"></div>
-    <div>Posição Y: <span id="valY">0</span> <input type="range" id="sliderY" min="-2" max="4" step="0.05" value="0" class="slider"></div>
-    <div>Posição Z: <span id="valZ">0</span> <input type="range" id="sliderZ" min="-3" max="3" step="0.05" value="0" class="slider"></div>
-    <div>Escala: <span id="valScale">1</span> <input type="range" id="sliderScale" min="0.1" max="10" step="0.1" value="1" class="slider"></div>
-    <div>Rotação X: <span id="valRotX">0</span> <input type="range" id="sliderRotX" min="-180" max="180" step="5" value="0" class="slider"></div>
-    <div>Rotação Y: <span id="valRotY">0</span> <input type="range" id="sliderRotY" min="-180" max="180" step="5" value="0" class="slider"></div>
-    
-    <hr>
-    
-    <button class="btn-salvar" id="btnSalvar">💾 4. SALVAR PROJETO</button>
-    <button class="btn-limpar" id="btnLimpar">🗑️ Limpar Todos os Elementos</button>
-    
-    <div id="status" style="margin-top: 10px; color: #aaa; font-size: 11px; text-align: center;">
-      ✅ Pronto! Carregue um target para começar.
+    <div id="projetosList" class="projetos-grid">
+      <div class="vazio">Carregando projetos...</div>
     </div>
   </div>
-  
-  <div class="info" id="info">🔍 Aguardando target...</div>
-  
-  <a-scene
-    id="scene"
-    mindar-image="imageTargetSrc: ; autoStart: true;"
-    vr-mode-ui="enabled: false"
-    device-orientation-permission-ui="enabled: true"
-    embedded>
-    
-    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-    
-    <a-entity mindar-image-target="targetIndex: 0" id="targetContainer">
-      <!-- Elementos serão adicionados aqui -->
-    </a-entity>
-    
-    <a-light type="ambient" intensity="0.5"></a-light>
-    <a-light type="directional" intensity="1" position="1 2 1"></a-light>
-  </a-scene>
 
   <script>
-    // ============================================
-    // VARIÁVEIS
-    // ============================================
-    let elementos = [];
-    let nextId = 1;
-    let elementoSelecionado = null;
-    let targetFile = null;
-    
-    const targetContainer = document.getElementById('targetContainer');
-    const scene = document.getElementById('scene');
-    const infoDiv = document.getElementById('info');
-    const statusDiv = document.getElementById('status');
-    const targetStatusDiv = document.getElementById('targetStatus');
-    const selectedNameSpan = document.getElementById('selectedName');
-    
-    // ============================================
-    // FUNÇÕES
-    // ============================================
-    
-    function atualizarStatus(msg) {
-      statusDiv.innerHTML = msg;
-      console.log(msg);
-    }
-    
-    function atualizarTargetStatus(carregado, nome = '') {
-      if (carregado) {
-        targetStatusDiv.innerHTML = `✅ TARGET CARREGADO: ${nome}`;
-        targetStatusDiv.className = 'target-status ok';
-        infoDiv.innerHTML = '✅ Target carregado! Aponte a câmera para a imagem';
-      } else {
-        targetStatusDiv.innerHTML = '⚠️ Nenhum target carregado - Clique no botão laranja acima';
-        targetStatusDiv.className = 'target-status';
-      }
-    }
-    
-    function adicionarElemento(tipo, nome, icon, file = null, texto = '') {
-      if (!targetFile) {
-        alert('⚠️ Primeiro carregue o target (.mind)! Clique no botão laranja "CARREGAR TARGET"');
-        return;
-      }
-      
-      const id = nextId++;
-      
-      const elemento = {
-        id: id,
-        tipo: tipo,
-        nome: nome,
-        icon: icon,
-        url: file ? URL.createObjectURL(file) : null,
-        file: file,
-        texto: texto,
-        posX: 0,
-        posY: 0,
-        posZ: 0,
-        scale: 1,
-        rotX: 0,
-        rotY: 0,
-        rotZ: 0
-      };
-      
-      elementos.push(elemento);
-      renderizarCena();
-      selecionarElemento(id);
-      atualizarStatus(`✅ ${nome} adicionado! Use os sliders para ajustar.`);
-    }
-    
-    function renderizarCena() {
-      targetContainer.innerHTML = '';
-      
-      elementos.forEach(el => {
-        const entity = document.createElement('a-entity');
-        entity.setAttribute('id', `elem-${el.id}`);
-        entity.setAttribute('position', `${el.posX} ${el.posY} ${el.posZ}`);
-        entity.setAttribute('scale', `${el.scale} ${el.scale} ${el.scale}`);
-        entity.setAttribute('rotation', `${el.rotX} ${el.rotY} ${el.rotZ}`);
-        
-        // Adicionar cursor para clicar e selecionar
-        entity.setAttribute('cursor', 'rayOrigin: mouse');
-        entity.setAttribute('raycaster', 'objects: *');
-        
-        if (el.tipo === 'modelo3d' && el.url) {
-          entity.setAttribute('gltf-model', el.url);
-          entity.setAttribute('animation-mixer', '');
-        } else if (el.tipo === 'video' && el.url) {
-          entity.setAttribute('video', `src: ${el.url}; loop: true; autoplay: true`);
-          entity.setAttribute('material', 'shader: standard');
-          entity.setAttribute('geometry', 'primitive: plane; width: 2; height: 1.5');
-        } else if (el.tipo === 'imagem' && el.url) {
-          entity.setAttribute('image', `src: ${el.url}`);
-          entity.setAttribute('geometry', 'primitive: plane; width: 2; height: 2');
-        } else if (el.tipo === 'texto') {
-          entity.setAttribute('text', `value: ${el.texto}; color: white; align: center; width: 3`);
-        }
-        
-        // Evento de clique para selecionar
-        entity.addEventListener('click', (e) => {
-          e.stopPropagation();
-          selecionarElemento(el.id);
-        });
-        
-        targetContainer.appendChild(entity);
-      });
-    }
-    
-    function selecionarElemento(id) {
-      const el = elementos.find(e => e.id === id);
-      if (!el) return;
-      
-      elementoSelecionado = el;
-      
-      document.getElementById('sliderX').value = el.posX;
-      document.getElementById('sliderY').value = el.posY;
-      document.getElementById('sliderZ').value = el.posZ;
-      document.getElementById('sliderScale').value = el.scale;
-      document.getElementById('sliderRotX').value = el.rotX;
-      document.getElementById('sliderRotY').value = el.rotY;
-      
-      document.getElementById('valX').innerText = el.posX;
-      document.getElementById('valY').innerText = el.posY;
-      document.getElementById('valZ').innerText = el.posZ;
-      document.getElementById('valScale').innerText = el.scale;
-      document.getElementById('valRotX').innerText = el.rotX;
-      document.getElementById('valRotY').innerText = el.rotY;
-      
-      selectedNameSpan.innerHTML = `🔧 ${el.nome}`;
-      atualizarStatus(`Editando: ${el.nome}`);
-    }
-    
-    function atualizarElementoSelecionado() {
-      if (!elementoSelecionado) return;
-      
-      elementoSelecionado.posX = parseFloat(document.getElementById('sliderX').value);
-      elementoSelecionado.posY = parseFloat(document.getElementById('sliderY').value);
-      elementoSelecionado.posZ = parseFloat(document.getElementById('sliderZ').value);
-      elementoSelecionado.scale = parseFloat(document.getElementById('sliderScale').value);
-      elementoSelecionado.rotX = parseFloat(document.getElementById('sliderRotX').value);
-      elementoSelecionado.rotY = parseFloat(document.getElementById('sliderRotY').value);
-      
-      document.getElementById('valX').innerText = elementoSelecionado.posX;
-      document.getElementById('valY').innerText = elementoSelecionado.posY;
-      document.getElementById('valZ').innerText = elementoSelecionado.posZ;
-      document.getElementById('valScale').innerText = elementoSelecionado.scale;
-      document.getElementById('valRotX').innerText = elementoSelecionado.rotX;
-      document.getElementById('valRotY').innerText = elementoSelecionado.rotY;
-      
-      renderizarCena();
-    }
-    
-    function limparElementos() {
-      if (confirm('Remover todos os elementos?')) {
-        elementos = [];
-        elementoSelecionado = null;
-        renderizarCena();
-        selectedNameSpan.innerHTML = 'Nenhum elemento selecionado';
-        atualizarStatus('🗑️ Todos os elementos removidos');
-      }
-    }
-    
-    // ============================================
-    // UPLOAD DE ARQUIVOS
-    // ============================================
-    function uploadArquivo(tipo, accept, nomePadrao, icon) {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = accept;
-      input.onchange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          adicionarElemento(tipo, file.name, icon, file);
-        }
-      };
-      input.click();
-    }
-    
-    function uploadTarget() {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.mind';
-      input.onchange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          targetFile = file;
-          const url = URL.createObjectURL(file);
-          scene.setAttribute('mindar-image', `imageTargetSrc: ${url}; autoStart: true;`);
-          atualizarTargetStatus(true, file.name);
-          atualizarStatus(`🎯 Target carregado: ${file.name}`);
-          infoDiv.innerHTML = '✅ Target carregado! Aponte a câmera para a imagem impressa';
-          
-          // Esconder mensagem após 5 segundos
-          setTimeout(() => {
-            infoDiv.innerHTML = '🔍 Aponte a câmera para o target';
-          }, 5000);
-        }
-      };
-      input.click();
-    }
-    
-    // ============================================
-    // SALVAR PROJETO
-    // ============================================
-    function salvarProjeto() {
-      if (!targetFile) {
-        alert('❌ Primeiro carregue um target (.mind)! Clique no botão laranja "CARREGAR TARGET"');
-        return;
-      }
-      
-      const projectId = Date.now().toString(36) + Math.random().toString(36).substr(2);
-      
-      const projeto = {
-        id: projectId,
-        nome: 'Projeto AR',
-        data: new Date().toISOString(),
-        target: { name: targetFile.name },
-        elementos: elementos.map(el => ({
-          tipo: el.tipo,
-          nome: el.nome,
-          texto: el.texto,
-          posX: el.posX,
-          posY: el.posY,
-          posZ: el.posZ,
-          scale: el.scale,
-          rotX: el.rotX,
-          rotY: el.rotY,
-          rotZ: el.rotZ
-        }))
-      };
-      
+    function carregarProjetos() {
       const projetos = JSON.parse(localStorage.getItem('ar_projetos') || '[]');
-      projetos.push(projeto);
-      localStorage.setItem('ar_projetos', JSON.stringify(projetos));
+      const container = document.getElementById('projetosList');
       
-      const baseUrl = window.location.origin + window.location.pathname.replace('editor.html', '');
-      const projectUrl = `${baseUrl}ver.html?id=${projectId}`;
+      if (projetos.length === 0) {
+        container.innerHTML = '<div class="vazio">✨ Nenhum projeto criado ainda.<br><br>👉 Clique em "EDITOR VISUAL" para começar!</div>';
+        return;
+      }
       
-      alert(`✅ Projeto salvo com sucesso!\n\n🔗 LINK: ${projectUrl}\n\n📋 O link foi copiado para sua área de transferência!\n\nCompartilhe com seu cliente!`);
-      navigator.clipboard.writeText(projectUrl);
+      projetos.sort((a, b) => new Date(b.data) - new Date(a.data));
       
-      // Abrir em nova aba
-      window.open(projectUrl, '_blank');
+      container.innerHTML = projetos.map(projeto => `
+        <div class="projeto-card">
+          <div class="projeto-nome">${projeto.nome || 'Projeto sem nome'}</div>
+          <div class="projeto-data">📅 Criado em: ${new Date(projeto.data).toLocaleDateString('pt-BR')}</div>
+          <div class="projeto-stats">
+            <span>🎯 ${projeto.target ? 'Target' : 'Sem target'}</span>
+            <span>📦 ${projeto.elementos ? projeto.elementos.length : 0} elemento(s)</span>
+          </div>
+          <div class="projeto-actions">
+            <button class="btn-link" onclick="copiarLink('${projeto.id}')">📋 Link</button>
+            <button class="btn-qr" onclick="gerarQR('${projeto.id}')">📱 QR</button>
+            <a href="ver.html?id=${projeto.id}" class="btn-ver" target="_blank">👁️ Ver</a>
+          </div>
+        </div>
+      `).join('');
     }
     
-    // ============================================
-    // EVENTOS DOS BOTÕES
-    // ============================================
-    document.getElementById('btnTarget').onclick = uploadTarget;
-    document.getElementById('btnModelo').onclick = () => uploadArquivo('modelo3d', '.glb,.gltf', 'Modelo 3D', '📦');
-    document.getElementById('btnVideo').onclick = () => uploadArquivo('video', '.mp4', 'Vídeo', '🎬');
-    document.getElementById('btnImagem').onclick = () => uploadArquivo('imagem', '.png,.jpg,.jpeg', 'Imagem', '🖼️');
-    document.getElementById('btnTexto').onclick = () => {
-      const texto = prompt('Digite o texto que aparecerá sobre o target:');
-      if (texto && texto.trim()) {
-        adicionarElemento('texto', texto.substring(0, 20), '📝', null, texto);
-      }
-    };
-    document.getElementById('btnSalvar').onclick = salvarProjeto;
-    document.getElementById('btnLimpar').onclick = limparElementos;
+    function copiarLink(projetoId) {
+      const url = `${window.location.origin}${window.location.pathname.replace('index.html', '')}ver.html?id=${projetoId}`;
+      navigator.clipboard.writeText(url).then(() => alert('✅ Link copiado!'));
+    }
     
-    // Eventos dos sliders
-    document.getElementById('sliderX').oninput = atualizarElementoSelecionado;
-    document.getElementById('sliderY').oninput = atualizarElementoSelecionado;
-    document.getElementById('sliderZ').oninput = atualizarElementoSelecionado;
-    document.getElementById('sliderScale').oninput = atualizarElementoSelecionado;
-    document.getElementById('sliderRotX').oninput = atualizarElementoSelecionado;
-    document.getElementById('sliderRotY').oninput = atualizarElementoSelecionado;
+    function gerarQR(projetoId) {
+      const url = `${window.location.origin}${window.location.pathname.replace('index.html', '')}ver.html?id=${projetoId}`;
+      const qrUrl = `https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=${encodeURIComponent(url)}&choe=UTF-8`;
+      
+      const modal = document.createElement('div');
+      modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      `;
+      modal.innerHTML = `
+        <div style="background: white; padding: 20px; border-radius: 15px; text-align: center;">
+          <img src="${qrUrl}" style="max-width: 200px;">
+          <p style="margin-top: 15px; word-break: break-all; font-size: 12px;">${url}</p>
+          <button onclick="this.parentElement.parentElement.remove()" style="margin-top: 15px; padding: 8px 20px; background: #667eea; color: white; border: none; border-radius: 5px;">Fechar</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
     
-    atualizarStatus('✅ Editor carregado! Clique no botão LARANJA para carregar o target.');
+    carregarProjetos();
   </script>
 </body>
 </html>
