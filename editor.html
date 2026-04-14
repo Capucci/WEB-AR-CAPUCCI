@@ -18,7 +18,6 @@
       height: 100vh;
     }
     
-    /* Layout Principal */
     .app-container {
       display: flex;
       height: 100vh;
@@ -109,7 +108,7 @@
       color: #e94560;
     }
     
-    /* Painel Central - Editor */
+    /* Painel Central */
     .editor-panel {
       flex: 1;
       display: flex;
@@ -117,7 +116,6 @@
       overflow: hidden;
     }
     
-    /* Preview AR */
     .ar-preview {
       flex: 2;
       background: #000;
@@ -129,7 +127,6 @@
       height: 100%;
     }
     
-    /* Painel de Controles */
     .controls-panel {
       flex: 1.5;
       background: #16213e;
@@ -139,7 +136,6 @@
       border-top: 1px solid #2a2a3a;
     }
     
-    /* Tabs dentro do painel */
     .editor-tabs {
       display: flex;
       gap: 5px;
@@ -155,7 +151,6 @@
       color: #aaa;
       cursor: pointer;
       border-radius: 5px;
-      transition: all 0.2s;
     }
     
     .editor-tab.active {
@@ -171,7 +166,6 @@
       display: block;
     }
     
-    /* Upload Areas */
     .upload-area {
       border: 2px dashed #2a2a3a;
       border-radius: 10px;
@@ -198,7 +192,6 @@
       margin-top: 5px;
     }
     
-    /* Sliders e controles */
     .control-group {
       background: #1a1a2e;
       padding: 15px;
@@ -209,24 +202,6 @@
     .control-group h4 {
       color: #e94560;
       margin-bottom: 15px;
-    }
-    
-    .slider-item {
-      margin-bottom: 12px;
-    }
-    
-    .slider-item label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      margin-bottom: 5px;
-    }
-    
-    input[type=range] {
-      width: 100%;
-      background: #2a2a3a;
-      height: 4px;
-      border-radius: 2px;
     }
     
     .coord-group {
@@ -256,7 +231,13 @@
       text-align: center;
     }
     
-    /* Botões */
+    input[type=range] {
+      width: 100%;
+      background: #2a2a3a;
+      height: 4px;
+      border-radius: 2px;
+    }
+    
     .btn-primary {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
@@ -273,11 +254,6 @@
       background: #28a745;
     }
     
-    .btn-warning {
-      background: #ff9800;
-    }
-    
-    /* Resultado */
     .result-overlay {
       position: fixed;
       top: 0;
@@ -310,28 +286,17 @@
 </head>
 <body>
   <div class="app-container">
-    <!-- BARRA LATERAL - CENAS -->
     <div class="scenes-sidebar">
       <div class="scenes-header">
         <h3>🎬 CENAS</h3>
         <button class="btn-add-scene" id="btnAddScene">+ Nova Cena</button>
       </div>
-      <div class="scenes-list" id="scenesList">
-        <!-- Cenas serão listadas aqui -->
-      </div>
+      <div class="scenes-list" id="scenesList"></div>
     </div>
     
-    <!-- PAINEL PRINCIPAL -->
     <div class="editor-panel">
-      <!-- Preview AR -->
       <div class="ar-preview">
-        <a-scene
-          id="arScene"
-          mindar-image="imageTargetSrc: ; autoStart: true;"
-          vr-mode-ui="enabled: false"
-          device-orientation-permission-ui="enabled: true"
-          embedded>
-          
+        <a-scene id="arScene" mindar-image="imageTargetSrc: ; autoStart: true;" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: true" embedded>
           <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
           <a-entity mindar-image-target="targetIndex: 0" id="targetContainer"></a-entity>
           <a-light type="ambient" intensity="0.5"></a-light>
@@ -339,7 +304,6 @@
         </a-scene>
       </div>
       
-      <!-- Painel de Controles -->
       <div class="controls-panel">
         <div class="editor-tabs">
           <button class="editor-tab active" data-tab="elementos">📦 Elementos</button>
@@ -347,32 +311,27 @@
           <button class="editor-tab" data-tab="interacao">🔗 Interação</button>
         </div>
         
-        <!-- ABA: ELEMENTOS -->
         <div class="tab-content active" id="tab-elementos">
           <div class="upload-area" id="uploadTargetBtn">
             <div style="font-size: 32px;">🎯</div>
             <div><strong>Target (.mind)</strong></div>
             <div class="file-info" id="targetInfo">Clique para carregar o target</div>
           </div>
-          
           <div class="upload-area" id="uploadModeloBtn">
             <div style="font-size: 32px;">📦</div>
             <div><strong>Objeto 3D (.glb)</strong></div>
             <div class="file-info" id="modeloInfo">Clique para adicionar</div>
           </div>
-          
           <div class="upload-area" id="uploadVideoBtn">
             <div style="font-size: 32px;">🎬</div>
             <div><strong>Vídeo (.mp4)</strong></div>
             <div class="file-info" id="videoInfo">Clique para adicionar</div>
           </div>
-          
           <div class="upload-area" id="uploadImagemBtn">
             <div style="font-size: 32px;">🖼️</div>
             <div><strong>Imagem (.png/.jpg)</strong></div>
             <div class="file-info" id="imagemInfo">Clique para adicionar</div>
           </div>
-          
           <div class="upload-area" id="uploadAudioBtn">
             <div style="font-size: 32px;">🎵</div>
             <div><strong>Áudio (.mp3)</strong></div>
@@ -380,64 +339,30 @@
           </div>
         </div>
         
-        <!-- ABA: AJUSTES -->
         <div class="tab-content" id="tab-ajustes">
           <div class="control-group">
             <h4>📍 Posição</h4>
             <div class="coord-group">
-              <div class="coord-input">
-                <label>X</label>
-                <input type="number" id="posX" step="0.05" value="0">
-              </div>
-              <div class="coord-input">
-                <label>Y</label>
-                <input type="number" id="posY" step="0.05" value="0">
-              </div>
-              <div class="coord-input">
-                <label>Z</label>
-                <input type="number" id="posZ" step="0.05" value="0">
-              </div>
+              <div class="coord-input"><label>X</label><input type="number" id="posX" step="0.05" value="0"></div>
+              <div class="coord-input"><label>Y</label><input type="number" id="posY" step="0.05" value="0"></div>
+              <div class="coord-input"><label>Z</label><input type="number" id="posZ" step="0.05" value="0"></div>
             </div>
           </div>
-          
           <div class="control-group">
             <h4>🔄 Rotação</h4>
             <div class="coord-group">
-              <div class="coord-input">
-                <label>X</label>
-                <input type="number" id="rotX" step="5" value="0">
-              </div>
-              <div class="coord-input">
-                <label>Y</label>
-                <input type="number" id="rotY" step="5" value="0">
-              </div>
-              <div class="coord-input">
-                <label>Z</label>
-                <input type="number" id="rotZ" step="5" value="0">
-              </div>
+              <div class="coord-input"><label>X</label><input type="number" id="rotX" step="5" value="0"></div>
+              <div class="coord-input"><label>Y</label><input type="number" id="rotY" step="5" value="0"></div>
+              <div class="coord-input"><label>Z</label><input type="number" id="rotZ" step="5" value="0"></div>
             </div>
           </div>
-          
           <div class="control-group">
             <h4>📏 Escala</h4>
             <input type="range" id="scale" min="0.1" max="10" step="0.1" value="1">
             <label style="text-align: center; display: block;">Valor: <span id="scaleVal">1.0</span></label>
           </div>
-          
-          <div class="control-group" id="videoConfig" style="display: none;">
-            <h4>🎬 Configurações de Vídeo</h4>
-            <div class="slider-item">
-              <label>Sensibilidade Chroma Key <span id="chromaVal">0.4</span></label>
-              <input type="range" id="chromaSens" min="0" max="1" step="0.05" value="0.4">
-            </div>
-            <div class="slider-item">
-              <label>Cor Chroma Key</label>
-              <input type="color" id="chromaColor" value="#00ff00" style="width: 100%;">
-            </div>
-          </div>
         </div>
         
-        <!-- ABA: INTERAÇÃO -->
         <div class="tab-content" id="tab-interacao">
           <div class="control-group">
             <h4>🔊 Áudio</h4>
@@ -445,27 +370,6 @@
               <option value="once">Tocar uma só vez</option>
               <option value="loop">Tocar em Looping</option>
             </select>
-          </div>
-          
-          <div class="control-group">
-            <h4>🖱️ Ao clicar no elemento</h4>
-            <select id="clickAction" style="width: 100%; padding: 8px; background: #1a1a2e; color: white; border: 1px solid #2a2a3a; border-radius: 5px; margin-bottom: 10px;">
-              <option value="none">Nenhuma ação</option>
-              <option value="scene">Ir para outra cena</option>
-              <option value="url">Abrir URL</option>
-            </select>
-            
-            <div id="clickSceneConfig" style="display: none;">
-              <label>Ir para cena:</label>
-              <select id="targetScene" style="width: 100%; padding: 8px; background: #1a1a2e; color: white; border: 1px solid #2a2a3a; border-radius: 5px;">
-                <option value="">Selecione uma cena</option>
-              </select>
-            </div>
-            
-            <div id="clickUrlConfig" style="display: none;">
-              <label>URL:</label>
-              <input type="text" id="targetUrl" placeholder="https://..." style="width: 100%; padding: 8px; background: #1a1a2e; color: white; border: 1px solid #2a2a3a; border-radius: 5px;">
-            </div>
           </div>
         </div>
         
@@ -475,7 +379,6 @@
     </div>
   </div>
   
-  <!-- Modal de Resultado -->
   <div class="result-overlay" id="resultOverlay">
     <div class="result-card">
       <h2 style="color: #28a745;">✅ PROJETO SALVO!</h2>
@@ -486,60 +389,18 @@
   </div>
 
   <script>
-    // ============================================
-    // ESTRUTURA DE DADOS
-    // ============================================
     let cenas = [];
     let cenaAtualId = null;
-    let elementoSelecionado = null;
-    let targetFile = null;
-    
-    // Elementos da cena atual
     let cenaElementos = {
-      target: null,
-      modelo: null,
-      video: null,
-      imagem: null,
-      audio: null,
-      config: {
-        posX: 0, posY: 0, posZ: 0,
-        rotX: 0, rotY: 0, rotZ: 0,
-        scale: 1,
-        chromaSens: 0.4,
-        chromaColor: '#00ff00',
-        audioMode: 'loop',
-        clickAction: 'none',
-        targetScene: '',
-        targetUrl: ''
-      }
+      target: null, modelo: null, video: null, imagem: null, audio: null,
+      config: { posX: 0, posY: 0, posZ: 0, rotX: 0, rotY: 0, rotZ: 0, scale: 1, audioMode: 'loop' }
     };
-    
-    // ============================================
-    // FUNÇÕES DE CENA
-    // ============================================
     
     function adicionarCena() {
       const novaCena = {
         id: Date.now(),
         nome: `CENA ${String(cenas.length + 1).padStart(2, '0')}`,
-        elementos: {
-          target: null,
-          modelo: null,
-          video: null,
-          imagem: null,
-          audio: null,
-          config: {
-            posX: 0, posY: 0, posZ: 0,
-            rotX: 0, rotY: 0, rotZ: 0,
-            scale: 1,
-            chromaSens: 0.4,
-            chromaColor: '#00ff00',
-            audioMode: 'loop',
-            clickAction: 'none',
-            targetScene: '',
-            targetUrl: ''
-          }
-        }
+        elementos: JSON.parse(JSON.stringify(cenaElementos))
       };
       cenas.push(novaCena);
       renderizarListaCenas();
@@ -551,25 +412,13 @@
       container.innerHTML = cenas.map(cena => `
         <div class="scene-item ${cenaAtualId === cena.id ? 'active' : ''}" onclick="selecionarCena(${cena.id})">
           <div class="scene-name">🎬 ${cena.nome}</div>
-          <div class="scene-stats">
-            ${cena.elementos.modelo ? '📦 ' : ''}
-            ${cena.elementos.video ? '🎬 ' : ''}
-            ${cena.elementos.imagem ? '🖼️ ' : ''}
-            ${cena.elementos.audio ? '🎵 ' : ''}
-          </div>
+          <div class="scene-stats">${cena.elementos.modelo ? '📦 ' : ''}${cena.elementos.video ? '🎬 ' : ''}${cena.elementos.imagem ? '🖼️ ' : ''}</div>
           <div class="scene-actions">
             <button onclick="event.stopPropagation(); renomearCena(${cena.id})">✏️</button>
-            <button onclick="event.stopPropagation(); duplicarCena(${cena.id})">📋</button>
             <button onclick="event.stopPropagation(); excluirCena(${cena.id})">🗑️</button>
           </div>
         </div>
       `).join('');
-      
-      // Atualizar dropdown de cenas para interação
-      const sceneSelect = document.getElementById('targetScene');
-      if (sceneSelect) {
-        sceneSelect.innerHTML = cenas.map(cena => `<option value="${cena.id}">${cena.nome}</option>`).join('');
-      }
     }
     
     function selecionarCena(id) {
@@ -577,14 +426,13 @@
       const cena = cenas.find(c => c.id === id);
       if (cena) {
         cenaElementos = cena.elementos;
-        carregarCenaNaInterface();
+        carregarInterface();
+        renderizarCenaAR();
       }
       renderizarListaCenas();
-      renderizarCenaAR();
     }
     
-    function carregarCenaNaInterface() {
-      // Atualizar sliders
+    function carregarInterface() {
       document.getElementById('posX').value = cenaElementos.config.posX;
       document.getElementById('posY').value = cenaElementos.config.posY;
       document.getElementById('posZ').value = cenaElementos.config.posZ;
@@ -593,41 +441,18 @@
       document.getElementById('rotZ').value = cenaElementos.config.rotZ;
       document.getElementById('scale').value = cenaElementos.config.scale;
       document.getElementById('scaleVal').innerText = cenaElementos.config.scale;
-      document.getElementById('chromaSens').value = cenaElementos.config.chromaSens;
-      document.getElementById('chromaColor').value = cenaElementos.config.chromaColor;
       document.getElementById('audioMode').value = cenaElementos.config.audioMode;
-      document.getElementById('clickAction').value = cenaElementos.config.clickAction;
-      document.getElementById('targetScene').value = cenaElementos.config.targetScene;
-      document.getElementById('targetUrl').value = cenaElementos.config.targetUrl;
       
-      // Atualizar infos de arquivos
-      if (cenaElementos.target) {
-        document.getElementById('targetInfo').innerHTML = `✅ ${cenaElementos.target.name}`;
-        document.getElementById('uploadTargetBtn').classList.add('has-file');
-      }
-      if (cenaElementos.modelo) {
-        document.getElementById('modeloInfo').innerHTML = `✅ ${cenaElementos.modelo.name}`;
-        document.getElementById('uploadModeloBtn').classList.add('has-file');
-      }
-      if (cenaElementos.video) {
-        document.getElementById('videoInfo').innerHTML = `✅ ${cenaElementos.video.name}`;
-        document.getElementById('uploadVideoBtn').classList.add('has-file');
-        document.getElementById('videoConfig').style.display = 'block';
-      }
-      if (cenaElementos.imagem) {
-        document.getElementById('imagemInfo').innerHTML = `✅ ${cenaElementos.imagem.name}`;
-        document.getElementById('uploadImagemBtn').classList.add('has-file');
-      }
-      if (cenaElementos.audio) {
-        document.getElementById('audioInfo').innerHTML = `✅ ${cenaElementos.audio.name}`;
-        document.getElementById('uploadAudioBtn').classList.add('has-file');
-      }
+      if (cenaElementos.target) document.getElementById('targetInfo').innerHTML = `✅ ${cenaElementos.target.name}`;
+      if (cenaElementos.modelo) document.getElementById('modeloInfo').innerHTML = `✅ ${cenaElementos.modelo.name}`;
+      if (cenaElementos.video) document.getElementById('videoInfo').innerHTML = `✅ ${cenaElementos.video.name}`;
+      if (cenaElementos.imagem) document.getElementById('imagemInfo').innerHTML = `✅ ${cenaElementos.imagem.name}`;
+      if (cenaElementos.audio) document.getElementById('audioInfo').innerHTML = `✅ ${cenaElementos.audio.name}`;
     }
     
     function renderizarCenaAR() {
       const container = document.getElementById('targetContainer');
       container.innerHTML = '';
-      
       if (!cenaElementos.modelo && !cenaElementos.video && !cenaElementos.imagem) return;
       
       const entity = document.createElement('a-entity');
@@ -640,13 +465,12 @@
         entity.setAttribute('animation-mixer', '');
       } else if (cenaElementos.video) {
         entity.setAttribute('video', `src: ${URL.createObjectURL(cenaElementos.video.file)}; loop: true; autoplay: true`);
-        entity.setAttribute('material', `shader: standard; transparent: true`);
+        entity.setAttribute('material', 'shader: standard');
         entity.setAttribute('geometry', 'primitive: plane; width: 2; height: 1.5');
       } else if (cenaElementos.imagem) {
         entity.setAttribute('image', `src: ${URL.createObjectURL(cenaElementos.imagem.file)}`);
         entity.setAttribute('geometry', 'primitive: plane; width: 2; height: 2');
       }
-      
       container.appendChild(entity);
     }
     
@@ -659,143 +483,40 @@
       }
     }
     
-    function renomearCena(id) {
-      const cena = cenas.find(c => c.id === id);
-      if (cena) {
-        const novoNome = prompt('Novo nome da cena:', cena.nome);
-        if (novoNome) {
-          cena.nome = novoNome;
-          renderizarListaCenas();
-        }
-      }
+    function salvarProjetoCompleto() {
+      const projetoId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+      const projeto = { id: projetoId, nome: 'Projeto AR', data: new Date().toISOString(), cenas: cenas.map(c => ({ id: c.id, nome: c.nome, elementos: { target: c.elementos.target ? { name: c.elementos.target.name } : null, modelo: c.elementos.modelo ? { name: c.elementos.modelo.name } : null, config: c.elementos.config } })) };
+      const projetos = JSON.parse(localStorage.getItem('ar_projetos') || '[]');
+      projetos.push(projeto);
+      localStorage.setItem('ar_projetos', JSON.stringify(projetos));
+      const url = `${window.location.origin}${window.location.pathname.replace('editor.html', '')}ver.html?id=${projetoId}`;
+      document.getElementById('resultUrl').innerHTML = url;
+      document.getElementById('resultQr').innerHTML = `<img src="https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(url)}">`;
+      document.getElementById('resultOverlay').style.display = 'flex';
+      navigator.clipboard.writeText(url);
     }
     
-    function duplicarCena(id) {
+    function renomearCena(id) {
       const cena = cenas.find(c => c.id === id);
-      if (cena) {
-        const novaCena = JSON.parse(JSON.stringify(cena));
-        novaCena.id = Date.now();
-        novaCena.nome = `${cena.nome} (cópia)`;
-        cenas.push(novaCena);
-        renderizarListaCenas();
-      }
+      if (cena) { const novoNome = prompt('Novo nome:', cena.nome); if (novoNome) { cena.nome = novoNome; renderizarListaCenas(); } }
     }
     
     function excluirCena(id) {
-      if (confirm('Excluir esta cena?')) {
-        cenas = cenas.filter(c => c.id !== id);
-        if (cenaAtualId === id) {
-          cenaAtualId = cenas.length > 0 ? cenas[0].id : null;
-          if (cenaAtualId) selecionarCena(cenaAtualId);
-        }
-        renderizarListaCenas();
-      }
+      if (confirm('Excluir esta cena?')) { cenas = cenas.filter(c => c.id !== id); if (cenaAtualId === id) cenaAtualId = cenas[0]?.id || null; renderizarListaCenas(); if (cenaAtualId) selecionarCena(cenaAtualId); }
     }
     
-    // ============================================
-    // FUNÇÕES DE UPLOAD
-    // ============================================
-    
-    function uploadFile(tipo, accept, field) {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = accept;
-      input.onchange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          cenaElementos[field] = { name: file.name, file: file };
-          document.getElementById(`${field}Info`).innerHTML = `✅ ${file.name}`;
-          document.getElementById(`upload${field.charAt(0).toUpperCase() + field.slice(1)}Btn`).classList.add('has-file');
-          
-          if (field === 'video') document.getElementById('videoConfig').style.display = 'block';
-          renderizarCenaAR();
-        }
-      };
+    function uploadFile(field, accept) {
+      const input = document.createElement('input'); input.type = 'file'; input.accept = accept;
+      input.onchange = (e) => { const file = e.target.files[0]; if (file) { cenaElementos[field] = { name: file.name, file: file }; document.getElementById(`${field}Info`).innerHTML = `✅ ${file.name}`; document.getElementById(`upload${field.charAt(0).toUpperCase() + field.slice(1)}Btn`).classList.add('has-file'); renderizarCenaAR(); } };
       input.click();
     }
     
     function uploadTarget() {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.mind';
-      input.onchange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          cenaElementos.target = { name: file.name, file: file };
-          targetFile = file;
-          document.getElementById('targetInfo').innerHTML = `✅ ${file.name}`;
-          document.getElementById('uploadTargetBtn').classList.add('has-file');
-          
-          const url = URL.createObjectURL(file);
-          document.getElementById('arScene').setAttribute('mindar-image', `imageTargetSrc: ${url}; autoStart: true;`);
-        }
-      };
+      const input = document.createElement('input'); input.type = 'file'; input.accept = '.mind';
+      input.onchange = (e) => { const file = e.target.files[0]; if (file) { cenaElementos.target = { name: file.name, file: file }; document.getElementById('targetInfo').innerHTML = `✅ ${file.name}`; document.getElementById('uploadTargetBtn').classList.add('has-file'); const url = URL.createObjectURL(file); document.getElementById('arScene').setAttribute('mindar-image', `imageTargetSrc: ${url}; autoStart: true;`); } };
       input.click();
     }
     
-    // ============================================
-    // SALVAR PROJETO COMPLETO
-    // ============================================
-    
-    function salvarProjetoCompleto() {
-      const projetoId = Date.now().toString(36) + Math.random().toString(36).substr(2);
-      
-      const projeto = {
-        id: projetoId,
-        nome: 'Projeto AR Completo',
-        data: new Date().toISOString(),
-        cenas: cenas.map(cena => ({
-          id: cena.id,
-          nome: cena.nome,
-          elementos: {
-            target: cena.elementos.target ? { name: cena.elementos.target.name } : null,
-            modelo: cena.elementos.modelo ? { name: cena.elementos.modelo.name } : null,
-            video: cena.elementos.video ? { name: cena.elementos.video.name } : null,
-            imagem: cena.elementos.imagem ? { name: cena.elementos.imagem.name } : null,
-            audio: cena.elementos.audio ? { name: cena.elementos.audio.name } : null,
-            config: cena.elementos.config
-          }
-        }))
-      };
-      
-      const projetos = JSON.parse(localStorage.getItem('ar_projetos') || '[]');
-      projetos.push(projeto);
-      localStorage.setItem('ar_projetos', JSON.stringify(projetos));
-      
-      const baseUrl = window.location.origin + window.location.pathname.replace('editor.html', '');
-      const projectUrl = `${baseUrl}ver.html?id=${projetoId}`;
-      
-      document.getElementById('resultUrl').innerHTML = projectUrl;
-      const qrUrl = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(projectUrl)}&choe=UTF-8`;
-      document.getElementById('resultQr').innerHTML = `<img src="${qrUrl}">`;
-      document.getElementById('resultOverlay').style.display = 'flex';
-      
-      navigator.clipboard.writeText(projectUrl);
-    }
-    
-    // ============================================
-    // EVENTOS E INICIALIZAÇÃO
-    // ============================================
-    
-    // Abas
-    document.querySelectorAll('.editor-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.editor-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        tab.classList.add('active');
-        document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
-      });
-    });
-    
-    // Ações de clique
-    document.getElementById('clickAction').addEventListener('change', (e) => {
-      const val = e.target.value;
-      document.getElementById('clickSceneConfig').style.display = val === 'scene' ? 'block' : 'none';
-      document.getElementById('clickUrlConfig').style.display = val === 'url' ? 'block' : 'none';
-      cenaElementos.config.clickAction = val;
-    });
-    
-    // Atualizar configurações em tempo real
     const updateConfig = () => {
       cenaElementos.config.posX = parseFloat(document.getElementById('posX').value);
       cenaElementos.config.posY = parseFloat(document.getElementById('posY').value);
@@ -804,15 +525,8 @@
       cenaElementos.config.rotY = parseFloat(document.getElementById('rotY').value);
       cenaElementos.config.rotZ = parseFloat(document.getElementById('rotZ').value);
       cenaElementos.config.scale = parseFloat(document.getElementById('scale').value);
-      cenaElementos.config.chromaSens = parseFloat(document.getElementById('chromaSens').value);
-      cenaElementos.config.chromaColor = document.getElementById('chromaColor').value;
       cenaElementos.config.audioMode = document.getElementById('audioMode').value;
-      cenaElementos.config.targetScene = document.getElementById('targetScene').value;
-      cenaElementos.config.targetUrl = document.getElementById('targetUrl').value;
-      
       document.getElementById('scaleVal').innerText = cenaElementos.config.scale;
-      document.getElementById('chromaVal').innerText = cenaElementos.config.chromaSens;
-      
       renderizarCenaAR();
     };
     
@@ -823,31 +537,31 @@
     document.getElementById('rotY').addEventListener('input', updateConfig);
     document.getElementById('rotZ').addEventListener('input', updateConfig);
     document.getElementById('scale').addEventListener('input', updateConfig);
-    document.getElementById('chromaSens').addEventListener('input', updateConfig);
-    document.getElementById('chromaColor').addEventListener('input', updateConfig);
     document.getElementById('audioMode').addEventListener('change', updateConfig);
-    document.getElementById('targetScene').addEventListener('change', updateConfig);
-    document.getElementById('targetUrl').addEventListener('input', updateConfig);
     
-    // Botões de upload
     document.getElementById('uploadTargetBtn').onclick = uploadTarget;
-    document.getElementById('uploadModeloBtn').onclick = () => uploadFile('modelo', '.glb,.gltf', 'modelo');
-    document.getElementById('uploadVideoBtn').onclick = () => uploadFile('video', '.mp4', 'video');
-    document.getElementById('uploadImagemBtn').onclick = () => uploadFile('imagem', '.png,.jpg,.jpeg', 'imagem');
-    document.getElementById('uploadAudioBtn').onclick = () => uploadFile('audio', '.mp3', 'audio');
-    
+    document.getElementById('uploadModeloBtn').onclick = () => uploadFile('modelo', '.glb,.gltf');
+    document.getElementById('uploadVideoBtn').onclick = () => uploadFile('video', '.mp4');
+    document.getElementById('uploadImagemBtn').onclick = () => uploadFile('imagem', '.png,.jpg,.jpeg');
+    document.getElementById('uploadAudioBtn').onclick = () => uploadFile('audio', '.mp3');
     document.getElementById('btnSalvarCena').onclick = salvarCenaAtual;
     document.getElementById('btnSalvarProjeto').onclick = salvarProjetoCompleto;
     document.getElementById('btnAddScene').onclick = adicionarCena;
     
-    // Inicializar com uma cena padrão
-    adicionarCena();
+    document.querySelectorAll('.editor-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.editor-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+      });
+    });
     
-    // Expor funções globais
     window.selecionarCena = selecionarCena;
     window.renomearCena = renomearCena;
-    window.duplicarCena = duplicarCena;
     window.excluirCena = excluirCena;
+    
+    adicionarCena();
   </script>
 </body>
 </html>
