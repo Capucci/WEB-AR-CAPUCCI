@@ -3,565 +3,424 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AR CapCreator - Plataforma Profissional de RA</title>
+  <title>Editor AR - Versão Simplificada</title>
   
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
   
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #1a1a2e;
-      overflow: hidden;
-      height: 100vh;
-    }
-    
-    .app-container {
-      display: flex;
-      height: 100vh;
-    }
-    
-    /* Barra Lateral - Cenas */
-    .scenes-sidebar {
-      width: 280px;
-      background: #0f0f1a;
+    body { margin: 0; overflow: hidden; font-family: Arial; }
+    .painel {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.85);
       color: white;
-      display: flex;
-      flex-direction: column;
-      border-right: 1px solid #2a2a3a;
+      padding: 15px;
+      border-radius: 10px;
+      z-index: 1000;
+      width: 300px;
+      font-size: 12px;
+      pointer-events: auto;
+      max-height: 95vh;
+      overflow-y: auto;
     }
-    
-    .scenes-header {
-      padding: 20px;
-      background: #1a1a2e;
-      border-bottom: 1px solid #2a2a3a;
-    }
-    
-    .scenes-header h3 {
-      color: #e94560;
-      margin-bottom: 10px;
-    }
-    
-    .btn-add-scene {
+    .painel button {
       background: #e94560;
       color: white;
       border: none;
-      padding: 10px;
-      border-radius: 8px;
-      cursor: pointer;
-      width: 100%;
-      font-weight: bold;
-    }
-    
-    .scenes-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 10px;
-    }
-    
-    .scene-item {
-      background: #1a1a2e;
-      padding: 15px;
-      margin-bottom: 10px;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.2s;
-      border-left: 3px solid transparent;
-    }
-    
-    .scene-item:hover {
-      background: #2a2a3a;
-    }
-    
-    .scene-item.active {
-      border-left-color: #e94560;
-      background: #2a2a3a;
-    }
-    
-    .scene-name {
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-    
-    .scene-stats {
-      font-size: 11px;
-      color: #888;
-    }
-    
-    .scene-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 8px;
-    }
-    
-    .scene-actions button {
-      background: none;
-      border: none;
-      color: #888;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    
-    .scene-actions button:hover {
-      color: #e94560;
-    }
-    
-    /* Painel Central */
-    .editor-panel {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    
-    .ar-preview {
-      flex: 2;
-      background: #000;
-      position: relative;
-    }
-    
-    a-scene {
-      width: 100%;
-      height: 100%;
-    }
-    
-    .controls-panel {
-      flex: 1.5;
-      background: #16213e;
-      color: white;
-      padding: 20px;
-      overflow-y: auto;
-      border-top: 1px solid #2a2a3a;
-    }
-    
-    .editor-tabs {
-      display: flex;
-      gap: 5px;
-      margin-bottom: 20px;
-      border-bottom: 1px solid #2a2a3a;
-      padding-bottom: 10px;
-    }
-    
-    .editor-tab {
-      background: none;
-      border: none;
-      padding: 8px 16px;
-      color: #aaa;
-      cursor: pointer;
+      padding: 10px 12px;
+      margin: 5px;
       border-radius: 5px;
-    }
-    
-    .editor-tab.active {
-      background: #e94560;
-      color: white;
-    }
-    
-    .tab-content {
-      display: none;
-    }
-    
-    .tab-content.active {
-      display: block;
-    }
-    
-    .upload-area {
-      border: 2px dashed #2a2a3a;
-      border-radius: 10px;
-      padding: 15px;
-      text-align: center;
       cursor: pointer;
-      margin-bottom: 15px;
-      transition: all 0.3s;
+      width: calc(100% - 10px);
     }
-    
-    .upload-area:hover {
-      border-color: #e94560;
-      background: #1a1a2e;
+    .painel button:hover {
+      background: #ff6b8b;
+      transform: scale(1.02);
     }
-    
-    .upload-area.has-file {
-      border-color: #28a745;
-      background: #1a3a1a;
-    }
-    
-    .file-info {
-      font-size: 11px;
-      color: #aaa;
-      margin-top: 5px;
-    }
-    
-    .control-group {
-      background: #1a1a2e;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-    }
-    
-    .control-group h4 {
-      color: #e94560;
-      margin-bottom: 15px;
-    }
-    
-    .coord-group {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-    
-    .coord-input {
-      text-align: center;
-    }
-    
-    .coord-input label {
-      display: block;
-      font-size: 11px;
-      margin-bottom: 5px;
-    }
-    
-    .coord-input input {
-      width: 100%;
-      padding: 6px;
-      background: #1a1a2e;
-      border: 1px solid #2a2a3a;
-      color: white;
-      border-radius: 5px;
-      text-align: center;
-    }
-    
-    input[type=range] {
-      width: 100%;
-      background: #2a2a3a;
-      height: 4px;
-      border-radius: 2px;
-    }
-    
-    .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      padding: 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      width: 100%;
+    .painel .btn-target {
+      background: #ff9800;
+      font-size: 16px;
       font-weight: bold;
-      margin-top: 10px;
     }
-    
-    .btn-success {
+    .painel .btn-salvar {
       background: #28a745;
     }
-    
-    .result-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
+    .painel .btn-limpar {
+      background: #dc3545;
+    }
+    .painel input {
       width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.9);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 10000;
+      margin: 5px 0;
+      padding: 5px;
     }
-    
-    .result-card {
-      background: white;
-      padding: 30px;
+    .slider {
+      width: 100%;
+      margin: 5px 0;
+    }
+    .info {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 8px 15px;
       border-radius: 20px;
-      text-align: center;
-      max-width: 400px;
+      z-index: 1000;
+      font-size: 12px;
     }
-    
-    .result-card .url {
-      word-break: break-all;
-      background: #f0f0f0;
-      padding: 10px;
+    .target-status {
+      background: #333;
+      padding: 8px;
       border-radius: 5px;
-      margin: 15px 0;
+      margin-bottom: 10px;
+      text-align: center;
+      font-size: 11px;
+    }
+    .target-status.ok {
+      background: #28a745;
+    }
+    hr {
+      margin: 10px 0;
+      border-color: #444;
     }
   </style>
 </head>
 <body>
-  <div class="app-container">
-    <div class="scenes-sidebar">
-      <div class="scenes-header">
-        <h3>🎬 CENAS</h3>
-        <button class="btn-add-scene" id="btnAddScene">+ Nova Cena</button>
-      </div>
-      <div class="scenes-list" id="scenesList"></div>
+  <div class="painel">
+    <h3>🎮 EDITOR AR</h3>
+    
+    <!-- Status do Target -->
+    <div class="target-status" id="targetStatus">
+      ⚠️ Nenhum target carregado
     </div>
     
-    <div class="editor-panel">
-      <div class="ar-preview">
-        <a-scene id="arScene" mindar-image="imageTargetSrc: ; autoStart: true;" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: true" embedded>
-          <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-          <a-entity mindar-image-target="targetIndex: 0" id="targetContainer"></a-entity>
-          <a-light type="ambient" intensity="0.5"></a-light>
-          <a-light type="directional" intensity="1" position="1 2 1"></a-light>
-        </a-scene>
-      </div>
-      
-      <div class="controls-panel">
-        <div class="editor-tabs">
-          <button class="editor-tab active" data-tab="elementos">📦 Elementos</button>
-          <button class="editor-tab" data-tab="ajustes">⚙️ Ajustes</button>
-          <button class="editor-tab" data-tab="interacao">🔗 Interação</button>
-        </div>
-        
-        <div class="tab-content active" id="tab-elementos">
-          <div class="upload-area" id="uploadTargetBtn">
-            <div style="font-size: 32px;">🎯</div>
-            <div><strong>Target (.mind)</strong></div>
-            <div class="file-info" id="targetInfo">Clique para carregar o target</div>
-          </div>
-          <div class="upload-area" id="uploadModeloBtn">
-            <div style="font-size: 32px;">📦</div>
-            <div><strong>Objeto 3D (.glb)</strong></div>
-            <div class="file-info" id="modeloInfo">Clique para adicionar</div>
-          </div>
-          <div class="upload-area" id="uploadVideoBtn">
-            <div style="font-size: 32px;">🎬</div>
-            <div><strong>Vídeo (.mp4)</strong></div>
-            <div class="file-info" id="videoInfo">Clique para adicionar</div>
-          </div>
-          <div class="upload-area" id="uploadImagemBtn">
-            <div style="font-size: 32px;">🖼️</div>
-            <div><strong>Imagem (.png/.jpg)</strong></div>
-            <div class="file-info" id="imagemInfo">Clique para adicionar</div>
-          </div>
-          <div class="upload-area" id="uploadAudioBtn">
-            <div style="font-size: 32px;">🎵</div>
-            <div><strong>Áudio (.mp3)</strong></div>
-            <div class="file-info" id="audioInfo">Clique para adicionar</div>
-          </div>
-        </div>
-        
-        <div class="tab-content" id="tab-ajustes">
-          <div class="control-group">
-            <h4>📍 Posição</h4>
-            <div class="coord-group">
-              <div class="coord-input"><label>X</label><input type="number" id="posX" step="0.05" value="0"></div>
-              <div class="coord-input"><label>Y</label><input type="number" id="posY" step="0.05" value="0"></div>
-              <div class="coord-input"><label>Z</label><input type="number" id="posZ" step="0.05" value="0"></div>
-            </div>
-          </div>
-          <div class="control-group">
-            <h4>🔄 Rotação</h4>
-            <div class="coord-group">
-              <div class="coord-input"><label>X</label><input type="number" id="rotX" step="5" value="0"></div>
-              <div class="coord-input"><label>Y</label><input type="number" id="rotY" step="5" value="0"></div>
-              <div class="coord-input"><label>Z</label><input type="number" id="rotZ" step="5" value="0"></div>
-            </div>
-          </div>
-          <div class="control-group">
-            <h4>📏 Escala</h4>
-            <input type="range" id="scale" min="0.1" max="10" step="0.1" value="1">
-            <label style="text-align: center; display: block;">Valor: <span id="scaleVal">1.0</span></label>
-          </div>
-        </div>
-        
-        <div class="tab-content" id="tab-interacao">
-          <div class="control-group">
-            <h4>🔊 Áudio</h4>
-            <select id="audioMode" style="width: 100%; padding: 8px; background: #1a1a2e; color: white; border: 1px solid #2a2a3a; border-radius: 5px;">
-              <option value="once">Tocar uma só vez</option>
-              <option value="loop">Tocar em Looping</option>
-            </select>
-          </div>
-        </div>
-        
-        <button class="btn-primary" id="btnSalvarCena">💾 Salvar Cena Atual</button>
-        <button class="btn-primary btn-success" id="btnSalvarProjeto">🚀 SALVAR PROJETO COMPLETO</button>
-      </div>
+    <!-- Botão principal para carregar target -->
+    <button class="btn-target" id="btnTarget">🎯 1. CARREGAR TARGET (.mind)</button>
+    <div style="font-size: 10px; color: #aaa; text-align: center; margin-bottom: 15px;">
+      Clique aqui, selecione o arquivo .mind e aponte a câmera
+    </div>
+    
+    <hr>
+    
+    <div style="font-weight: bold; margin-bottom: 5px;">2. ADICIONAR ELEMENTOS:</div>
+    <button id="btnModelo">📦 Adicionar Modelo 3D (.glb)</button>
+    <button id="btnVideo">🎬 Adicionar Vídeo (.mp4)</button>
+    <button id="btnImagem">🖼️ Adicionar Imagem (.png/.jpg)</button>
+    <button id="btnTexto">📝 Adicionar Texto</button>
+    
+    <hr>
+    
+    <div style="font-weight: bold; margin-bottom: 5px;">3. AJUSTES DO ELEMENTO SELECIONADO:</div>
+    <div id="selectedName" style="background: #e94560; padding: 5px; border-radius: 5px; text-align: center; margin-bottom: 10px;">
+      Nenhum elemento selecionado
+    </div>
+    
+    <div>Posição X: <span id="valX">0</span> <input type="range" id="sliderX" min="-3" max="3" step="0.05" value="0" class="slider"></div>
+    <div>Posição Y: <span id="valY">0</span> <input type="range" id="sliderY" min="-2" max="4" step="0.05" value="0" class="slider"></div>
+    <div>Posição Z: <span id="valZ">0</span> <input type="range" id="sliderZ" min="-3" max="3" step="0.05" value="0" class="slider"></div>
+    <div>Escala: <span id="valScale">1</span> <input type="range" id="sliderScale" min="0.1" max="10" step="0.1" value="1" class="slider"></div>
+    <div>Rotação X: <span id="valRotX">0</span> <input type="range" id="sliderRotX" min="-180" max="180" step="5" value="0" class="slider"></div>
+    <div>Rotação Y: <span id="valRotY">0</span> <input type="range" id="sliderRotY" min="-180" max="180" step="5" value="0" class="slider"></div>
+    
+    <hr>
+    
+    <button class="btn-salvar" id="btnSalvar">💾 4. SALVAR PROJETO</button>
+    <button class="btn-limpar" id="btnLimpar">🗑️ Limpar Todos os Elementos</button>
+    
+    <div id="status" style="margin-top: 10px; color: #aaa; font-size: 11px; text-align: center;">
+      ✅ Pronto! Carregue um target para começar.
     </div>
   </div>
   
-  <div class="result-overlay" id="resultOverlay">
-    <div class="result-card">
-      <h2 style="color: #28a745;">✅ PROJETO SALVO!</h2>
-      <div class="url" id="resultUrl"></div>
-      <div id="resultQr"></div>
-      <button onclick="document.getElementById('resultOverlay').style.display='none'" style="margin-top: 15px; padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px;">Fechar</button>
-    </div>
-  </div>
+  <div class="info" id="info">🔍 Aguardando target...</div>
+  
+  <a-scene
+    id="scene"
+    mindar-image="imageTargetSrc: ; autoStart: true;"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: true"
+    embedded>
+    
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+    
+    <a-entity mindar-image-target="targetIndex: 0" id="targetContainer">
+      <!-- Elementos serão adicionados aqui -->
+    </a-entity>
+    
+    <a-light type="ambient" intensity="0.5"></a-light>
+    <a-light type="directional" intensity="1" position="1 2 1"></a-light>
+  </a-scene>
 
   <script>
-    let cenas = [];
-    let cenaAtualId = null;
-    let cenaElementos = {
-      target: null, modelo: null, video: null, imagem: null, audio: null,
-      config: { posX: 0, posY: 0, posZ: 0, rotX: 0, rotY: 0, rotZ: 0, scale: 1, audioMode: 'loop' }
-    };
+    // ============================================
+    // VARIÁVEIS
+    // ============================================
+    let elementos = [];
+    let nextId = 1;
+    let elementoSelecionado = null;
+    let targetFile = null;
     
-    function adicionarCena() {
-      const novaCena = {
-        id: Date.now(),
-        nome: `CENA ${String(cenas.length + 1).padStart(2, '0')}`,
-        elementos: JSON.parse(JSON.stringify(cenaElementos))
+    const targetContainer = document.getElementById('targetContainer');
+    const scene = document.getElementById('scene');
+    const infoDiv = document.getElementById('info');
+    const statusDiv = document.getElementById('status');
+    const targetStatusDiv = document.getElementById('targetStatus');
+    const selectedNameSpan = document.getElementById('selectedName');
+    
+    // ============================================
+    // FUNÇÕES
+    // ============================================
+    
+    function atualizarStatus(msg) {
+      statusDiv.innerHTML = msg;
+      console.log(msg);
+    }
+    
+    function atualizarTargetStatus(carregado, nome = '') {
+      if (carregado) {
+        targetStatusDiv.innerHTML = `✅ TARGET CARREGADO: ${nome}`;
+        targetStatusDiv.className = 'target-status ok';
+        infoDiv.innerHTML = '✅ Target carregado! Aponte a câmera para a imagem';
+      } else {
+        targetStatusDiv.innerHTML = '⚠️ Nenhum target carregado - Clique no botão laranja acima';
+        targetStatusDiv.className = 'target-status';
+      }
+    }
+    
+    function adicionarElemento(tipo, nome, icon, file = null, texto = '') {
+      if (!targetFile) {
+        alert('⚠️ Primeiro carregue o target (.mind)! Clique no botão laranja "CARREGAR TARGET"');
+        return;
+      }
+      
+      const id = nextId++;
+      
+      const elemento = {
+        id: id,
+        tipo: tipo,
+        nome: nome,
+        icon: icon,
+        url: file ? URL.createObjectURL(file) : null,
+        file: file,
+        texto: texto,
+        posX: 0,
+        posY: 0,
+        posZ: 0,
+        scale: 1,
+        rotX: 0,
+        rotY: 0,
+        rotZ: 0
       };
-      cenas.push(novaCena);
-      renderizarListaCenas();
-      selecionarCena(novaCena.id);
-    }
-    
-    function renderizarListaCenas() {
-      const container = document.getElementById('scenesList');
-      container.innerHTML = cenas.map(cena => `
-        <div class="scene-item ${cenaAtualId === cena.id ? 'active' : ''}" onclick="selecionarCena(${cena.id})">
-          <div class="scene-name">🎬 ${cena.nome}</div>
-          <div class="scene-stats">${cena.elementos.modelo ? '📦 ' : ''}${cena.elementos.video ? '🎬 ' : ''}${cena.elementos.imagem ? '🖼️ ' : ''}</div>
-          <div class="scene-actions">
-            <button onclick="event.stopPropagation(); renomearCena(${cena.id})">✏️</button>
-            <button onclick="event.stopPropagation(); excluirCena(${cena.id})">🗑️</button>
-          </div>
-        </div>
-      `).join('');
-    }
-    
-    function selecionarCena(id) {
-      cenaAtualId = id;
-      const cena = cenas.find(c => c.id === id);
-      if (cena) {
-        cenaElementos = cena.elementos;
-        carregarInterface();
-        renderizarCenaAR();
-      }
-      renderizarListaCenas();
-    }
-    
-    function carregarInterface() {
-      document.getElementById('posX').value = cenaElementos.config.posX;
-      document.getElementById('posY').value = cenaElementos.config.posY;
-      document.getElementById('posZ').value = cenaElementos.config.posZ;
-      document.getElementById('rotX').value = cenaElementos.config.rotX;
-      document.getElementById('rotY').value = cenaElementos.config.rotY;
-      document.getElementById('rotZ').value = cenaElementos.config.rotZ;
-      document.getElementById('scale').value = cenaElementos.config.scale;
-      document.getElementById('scaleVal').innerText = cenaElementos.config.scale;
-      document.getElementById('audioMode').value = cenaElementos.config.audioMode;
       
-      if (cenaElementos.target) document.getElementById('targetInfo').innerHTML = `✅ ${cenaElementos.target.name}`;
-      if (cenaElementos.modelo) document.getElementById('modeloInfo').innerHTML = `✅ ${cenaElementos.modelo.name}`;
-      if (cenaElementos.video) document.getElementById('videoInfo').innerHTML = `✅ ${cenaElementos.video.name}`;
-      if (cenaElementos.imagem) document.getElementById('imagemInfo').innerHTML = `✅ ${cenaElementos.imagem.name}`;
-      if (cenaElementos.audio) document.getElementById('audioInfo').innerHTML = `✅ ${cenaElementos.audio.name}`;
+      elementos.push(elemento);
+      renderizarCena();
+      selecionarElemento(id);
+      atualizarStatus(`✅ ${nome} adicionado! Use os sliders para ajustar.`);
     }
     
-    function renderizarCenaAR() {
-      const container = document.getElementById('targetContainer');
-      container.innerHTML = '';
-      if (!cenaElementos.modelo && !cenaElementos.video && !cenaElementos.imagem) return;
+    function renderizarCena() {
+      targetContainer.innerHTML = '';
       
-      const entity = document.createElement('a-entity');
-      entity.setAttribute('position', `${cenaElementos.config.posX} ${cenaElementos.config.posY} ${cenaElementos.config.posZ}`);
-      entity.setAttribute('scale', `${cenaElementos.config.scale} ${cenaElementos.config.scale} ${cenaElementos.config.scale}`);
-      entity.setAttribute('rotation', `${cenaElementos.config.rotX} ${cenaElementos.config.rotY} ${cenaElementos.config.rotZ}`);
+      elementos.forEach(el => {
+        const entity = document.createElement('a-entity');
+        entity.setAttribute('id', `elem-${el.id}`);
+        entity.setAttribute('position', `${el.posX} ${el.posY} ${el.posZ}`);
+        entity.setAttribute('scale', `${el.scale} ${el.scale} ${el.scale}`);
+        entity.setAttribute('rotation', `${el.rotX} ${el.rotY} ${el.rotZ}`);
+        
+        // Adicionar cursor para clicar e selecionar
+        entity.setAttribute('cursor', 'rayOrigin: mouse');
+        entity.setAttribute('raycaster', 'objects: *');
+        
+        if (el.tipo === 'modelo3d' && el.url) {
+          entity.setAttribute('gltf-model', el.url);
+          entity.setAttribute('animation-mixer', '');
+        } else if (el.tipo === 'video' && el.url) {
+          entity.setAttribute('video', `src: ${el.url}; loop: true; autoplay: true`);
+          entity.setAttribute('material', 'shader: standard');
+          entity.setAttribute('geometry', 'primitive: plane; width: 2; height: 1.5');
+        } else if (el.tipo === 'imagem' && el.url) {
+          entity.setAttribute('image', `src: ${el.url}`);
+          entity.setAttribute('geometry', 'primitive: plane; width: 2; height: 2');
+        } else if (el.tipo === 'texto') {
+          entity.setAttribute('text', `value: ${el.texto}; color: white; align: center; width: 3`);
+        }
+        
+        // Evento de clique para selecionar
+        entity.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selecionarElemento(el.id);
+        });
+        
+        targetContainer.appendChild(entity);
+      });
+    }
+    
+    function selecionarElemento(id) {
+      const el = elementos.find(e => e.id === id);
+      if (!el) return;
       
-      if (cenaElementos.modelo) {
-        entity.setAttribute('gltf-model', URL.createObjectURL(cenaElementos.modelo.file));
-        entity.setAttribute('animation-mixer', '');
-      } else if (cenaElementos.video) {
-        entity.setAttribute('video', `src: ${URL.createObjectURL(cenaElementos.video.file)}; loop: true; autoplay: true`);
-        entity.setAttribute('material', 'shader: standard');
-        entity.setAttribute('geometry', 'primitive: plane; width: 2; height: 1.5');
-      } else if (cenaElementos.imagem) {
-        entity.setAttribute('image', `src: ${URL.createObjectURL(cenaElementos.imagem.file)}`);
-        entity.setAttribute('geometry', 'primitive: plane; width: 2; height: 2');
+      elementoSelecionado = el;
+      
+      document.getElementById('sliderX').value = el.posX;
+      document.getElementById('sliderY').value = el.posY;
+      document.getElementById('sliderZ').value = el.posZ;
+      document.getElementById('sliderScale').value = el.scale;
+      document.getElementById('sliderRotX').value = el.rotX;
+      document.getElementById('sliderRotY').value = el.rotY;
+      
+      document.getElementById('valX').innerText = el.posX;
+      document.getElementById('valY').innerText = el.posY;
+      document.getElementById('valZ').innerText = el.posZ;
+      document.getElementById('valScale').innerText = el.scale;
+      document.getElementById('valRotX').innerText = el.rotX;
+      document.getElementById('valRotY').innerText = el.rotY;
+      
+      selectedNameSpan.innerHTML = `🔧 ${el.nome}`;
+      atualizarStatus(`Editando: ${el.nome}`);
+    }
+    
+    function atualizarElementoSelecionado() {
+      if (!elementoSelecionado) return;
+      
+      elementoSelecionado.posX = parseFloat(document.getElementById('sliderX').value);
+      elementoSelecionado.posY = parseFloat(document.getElementById('sliderY').value);
+      elementoSelecionado.posZ = parseFloat(document.getElementById('sliderZ').value);
+      elementoSelecionado.scale = parseFloat(document.getElementById('sliderScale').value);
+      elementoSelecionado.rotX = parseFloat(document.getElementById('sliderRotX').value);
+      elementoSelecionado.rotY = parseFloat(document.getElementById('sliderRotY').value);
+      
+      document.getElementById('valX').innerText = elementoSelecionado.posX;
+      document.getElementById('valY').innerText = elementoSelecionado.posY;
+      document.getElementById('valZ').innerText = elementoSelecionado.posZ;
+      document.getElementById('valScale').innerText = elementoSelecionado.scale;
+      document.getElementById('valRotX').innerText = elementoSelecionado.rotX;
+      document.getElementById('valRotY').innerText = elementoSelecionado.rotY;
+      
+      renderizarCena();
+    }
+    
+    function limparElementos() {
+      if (confirm('Remover todos os elementos?')) {
+        elementos = [];
+        elementoSelecionado = null;
+        renderizarCena();
+        selectedNameSpan.innerHTML = 'Nenhum elemento selecionado';
+        atualizarStatus('🗑️ Todos os elementos removidos');
       }
-      container.appendChild(entity);
     }
     
-    function salvarCenaAtual() {
-      const cena = cenas.find(c => c.id === cenaAtualId);
-      if (cena) {
-        cena.elementos = JSON.parse(JSON.stringify(cenaElementos));
-        renderizarListaCenas();
-        alert(`✅ Cena "${cena.nome}" salva!`);
-      }
-    }
-    
-    function salvarProjetoCompleto() {
-      const projetoId = Date.now().toString(36) + Math.random().toString(36).substr(2);
-      const projeto = { id: projetoId, nome: 'Projeto AR', data: new Date().toISOString(), cenas: cenas.map(c => ({ id: c.id, nome: c.nome, elementos: { target: c.elementos.target ? { name: c.elementos.target.name } : null, modelo: c.elementos.modelo ? { name: c.elementos.modelo.name } : null, config: c.elementos.config } })) };
-      const projetos = JSON.parse(localStorage.getItem('ar_projetos') || '[]');
-      projetos.push(projeto);
-      localStorage.setItem('ar_projetos', JSON.stringify(projetos));
-      const url = `${window.location.origin}${window.location.pathname.replace('editor.html', '')}ver.html?id=${projetoId}`;
-      document.getElementById('resultUrl').innerHTML = url;
-      document.getElementById('resultQr').innerHTML = `<img src="https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(url)}">`;
-      document.getElementById('resultOverlay').style.display = 'flex';
-      navigator.clipboard.writeText(url);
-    }
-    
-    function renomearCena(id) {
-      const cena = cenas.find(c => c.id === id);
-      if (cena) { const novoNome = prompt('Novo nome:', cena.nome); if (novoNome) { cena.nome = novoNome; renderizarListaCenas(); } }
-    }
-    
-    function excluirCena(id) {
-      if (confirm('Excluir esta cena?')) { cenas = cenas.filter(c => c.id !== id); if (cenaAtualId === id) cenaAtualId = cenas[0]?.id || null; renderizarListaCenas(); if (cenaAtualId) selecionarCena(cenaAtualId); }
-    }
-    
-    function uploadFile(field, accept) {
-      const input = document.createElement('input'); input.type = 'file'; input.accept = accept;
-      input.onchange = (e) => { const file = e.target.files[0]; if (file) { cenaElementos[field] = { name: file.name, file: file }; document.getElementById(`${field}Info`).innerHTML = `✅ ${file.name}`; document.getElementById(`upload${field.charAt(0).toUpperCase() + field.slice(1)}Btn`).classList.add('has-file'); renderizarCenaAR(); } };
+    // ============================================
+    // UPLOAD DE ARQUIVOS
+    // ============================================
+    function uploadArquivo(tipo, accept, nomePadrao, icon) {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = accept;
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          adicionarElemento(tipo, file.name, icon, file);
+        }
+      };
       input.click();
     }
     
     function uploadTarget() {
-      const input = document.createElement('input'); input.type = 'file'; input.accept = '.mind';
-      input.onchange = (e) => { const file = e.target.files[0]; if (file) { cenaElementos.target = { name: file.name, file: file }; document.getElementById('targetInfo').innerHTML = `✅ ${file.name}`; document.getElementById('uploadTargetBtn').classList.add('has-file'); const url = URL.createObjectURL(file); document.getElementById('arScene').setAttribute('mindar-image', `imageTargetSrc: ${url}; autoStart: true;`); } };
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.mind';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          targetFile = file;
+          const url = URL.createObjectURL(file);
+          scene.setAttribute('mindar-image', `imageTargetSrc: ${url}; autoStart: true;`);
+          atualizarTargetStatus(true, file.name);
+          atualizarStatus(`🎯 Target carregado: ${file.name}`);
+          infoDiv.innerHTML = '✅ Target carregado! Aponte a câmera para a imagem impressa';
+          
+          // Esconder mensagem após 5 segundos
+          setTimeout(() => {
+            infoDiv.innerHTML = '🔍 Aponte a câmera para o target';
+          }, 5000);
+        }
+      };
       input.click();
     }
     
-    const updateConfig = () => {
-      cenaElementos.config.posX = parseFloat(document.getElementById('posX').value);
-      cenaElementos.config.posY = parseFloat(document.getElementById('posY').value);
-      cenaElementos.config.posZ = parseFloat(document.getElementById('posZ').value);
-      cenaElementos.config.rotX = parseFloat(document.getElementById('rotX').value);
-      cenaElementos.config.rotY = parseFloat(document.getElementById('rotY').value);
-      cenaElementos.config.rotZ = parseFloat(document.getElementById('rotZ').value);
-      cenaElementos.config.scale = parseFloat(document.getElementById('scale').value);
-      cenaElementos.config.audioMode = document.getElementById('audioMode').value;
-      document.getElementById('scaleVal').innerText = cenaElementos.config.scale;
-      renderizarCenaAR();
+    // ============================================
+    // SALVAR PROJETO
+    // ============================================
+    function salvarProjeto() {
+      if (!targetFile) {
+        alert('❌ Primeiro carregue um target (.mind)! Clique no botão laranja "CARREGAR TARGET"');
+        return;
+      }
+      
+      const projectId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+      
+      const projeto = {
+        id: projectId,
+        nome: 'Projeto AR',
+        data: new Date().toISOString(),
+        target: { name: targetFile.name },
+        elementos: elementos.map(el => ({
+          tipo: el.tipo,
+          nome: el.nome,
+          texto: el.texto,
+          posX: el.posX,
+          posY: el.posY,
+          posZ: el.posZ,
+          scale: el.scale,
+          rotX: el.rotX,
+          rotY: el.rotY,
+          rotZ: el.rotZ
+        }))
+      };
+      
+      const projetos = JSON.parse(localStorage.getItem('ar_projetos') || '[]');
+      projetos.push(projeto);
+      localStorage.setItem('ar_projetos', JSON.stringify(projetos));
+      
+      const baseUrl = window.location.origin + window.location.pathname.replace('editor.html', '');
+      const projectUrl = `${baseUrl}ver.html?id=${projectId}`;
+      
+      alert(`✅ Projeto salvo com sucesso!\n\n🔗 LINK: ${projectUrl}\n\n📋 O link foi copiado para sua área de transferência!\n\nCompartilhe com seu cliente!`);
+      navigator.clipboard.writeText(projectUrl);
+      
+      // Abrir em nova aba
+      window.open(projectUrl, '_blank');
+    }
+    
+    // ============================================
+    // EVENTOS DOS BOTÕES
+    // ============================================
+    document.getElementById('btnTarget').onclick = uploadTarget;
+    document.getElementById('btnModelo').onclick = () => uploadArquivo('modelo3d', '.glb,.gltf', 'Modelo 3D', '📦');
+    document.getElementById('btnVideo').onclick = () => uploadArquivo('video', '.mp4', 'Vídeo', '🎬');
+    document.getElementById('btnImagem').onclick = () => uploadArquivo('imagem', '.png,.jpg,.jpeg', 'Imagem', '🖼️');
+    document.getElementById('btnTexto').onclick = () => {
+      const texto = prompt('Digite o texto que aparecerá sobre o target:');
+      if (texto && texto.trim()) {
+        adicionarElemento('texto', texto.substring(0, 20), '📝', null, texto);
+      }
     };
+    document.getElementById('btnSalvar').onclick = salvarProjeto;
+    document.getElementById('btnLimpar').onclick = limparElementos;
     
-    document.getElementById('posX').addEventListener('input', updateConfig);
-    document.getElementById('posY').addEventListener('input', updateConfig);
-    document.getElementById('posZ').addEventListener('input', updateConfig);
-    document.getElementById('rotX').addEventListener('input', updateConfig);
-    document.getElementById('rotY').addEventListener('input', updateConfig);
-    document.getElementById('rotZ').addEventListener('input', updateConfig);
-    document.getElementById('scale').addEventListener('input', updateConfig);
-    document.getElementById('audioMode').addEventListener('change', updateConfig);
+    // Eventos dos sliders
+    document.getElementById('sliderX').oninput = atualizarElementoSelecionado;
+    document.getElementById('sliderY').oninput = atualizarElementoSelecionado;
+    document.getElementById('sliderZ').oninput = atualizarElementoSelecionado;
+    document.getElementById('sliderScale').oninput = atualizarElementoSelecionado;
+    document.getElementById('sliderRotX').oninput = atualizarElementoSelecionado;
+    document.getElementById('sliderRotY').oninput = atualizarElementoSelecionado;
     
-    document.getElementById('uploadTargetBtn').onclick = uploadTarget;
-    document.getElementById('uploadModeloBtn').onclick = () => uploadFile('modelo', '.glb,.gltf');
-    document.getElementById('uploadVideoBtn').onclick = () => uploadFile('video', '.mp4');
-    document.getElementById('uploadImagemBtn').onclick = () => uploadFile('imagem', '.png,.jpg,.jpeg');
-    document.getElementById('uploadAudioBtn').onclick = () => uploadFile('audio', '.mp3');
-    document.getElementById('btnSalvarCena').onclick = salvarCenaAtual;
-    document.getElementById('btnSalvarProjeto').onclick = salvarProjetoCompleto;
-    document.getElementById('btnAddScene').onclick = adicionarCena;
-    
-    document.querySelectorAll('.editor-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.editor-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        tab.classList.add('active');
-        document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
-      });
-    });
-    
-    window.selecionarCena = selecionarCena;
-    window.renomearCena = renomearCena;
-    window.excluirCena = excluirCena;
-    
-    adicionarCena();
+    atualizarStatus('✅ Editor carregado! Clique no botão LARANJA para carregar o target.');
   </script>
 </body>
 </html>
