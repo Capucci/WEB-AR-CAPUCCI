@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AR Viewer</title>
+  <title>AR Multi-Viewer</title>
   
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
@@ -39,40 +39,23 @@
       position: fixed;
       bottom: 20px;
       left: 20px;
-      background: rgba(0,0,0,0.7);
+      background: rgba(0,0,0,0.8);
       color: white;
-      padding: 8px 15px;
-      border-radius: 20px;
-      font-size: 12px;
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 14px;
       z-index: 9999;
-    }
-    .audio-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: rgba(0,0,0,0.7);
-      border: 2px solid white;
-      color: white;
-      font-size: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 9999;
+      font-family: monospace;
     }
   </style>
 </head>
 <body>
   <div class="loading" id="loading">
     <div class="spinner"></div>
-    <div>Carregando AR...</div>
+    <div>Carregando AR Multi-Target...</div>
   </div>
   
-  <div class="info" id="info">🔍 Aponte para o target</div>
-  <button class="audio-btn" id="audioBtn">🔇</button>
+  <div class="info" id="info">🔍 Aguardando target...</div>
   
   <a-scene
     id="scene"
@@ -82,8 +65,7 @@
     embedded>
     
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-    <div id="target-container"></div>
-    <audio id="audioElem" preload="auto"></audio>
+    <div id="targets-container"></div>
   </a-scene>
 
   <script>
@@ -103,82 +85,91 @@
       setTimeout(() => window.location.href = 'index.html', 2000);
     }
     
-    console.log('Projeto:', projeto);
+    console.log('Projeto Multi-Target:', projeto);
     
-    // Configurar target
-    const targetUrl = `https://capucci.github.io/AR-CapCreator/assets/${projeto.target.name}`;
-    document.getElementById('scene').setAttribute('mindar-image', `imageTargetSrc: ${targetUrl}; autoStart: true;`);
+    const container = document.getElementById('targets-container');
+    const scene = document.getElementById('scene');
     
-    // Criar entidade do modelo
-    const container = document.getElementById('target-container');
-    const targetEntity = document.createElement('a-entity');
-    targetEntity.setAttribute('mindar-image-target', 'targetIndex: 0');
+    // Construir string de targets para o Mind AR (todos os targets)
+    // O Mind AR suporta múltiplos targets em um único arquivo .mind compilado
+    // Para simplificar, vamos usar o primeiro target como principal
     
-    const modeloUrl = `https://capucci.github.io/AR-CapCreator/assets/${projeto.modelo.name}`;
-    const modeloEntity = document.createElement('a-entity');
-    modeloEntity.setAttribute('gltf-model', modeloUrl);
-    modeloEntity.setAttribute('animation-mixer', '');
-    
-    const config = projeto.config || { scale: 100, posY: 0, rotX: -90, rotY: 0 };
-    modeloEntity.setAttribute('scale', `${config.scale} ${config.scale} ${config.scale}`);
-    modeloEntity.setAttribute('position', `0 ${config.posY} 0`);
-    modeloEntity.setAttribute('rotation', `${config.rotX} ${config.rotY} 0`);
-    
-    targetEntity.appendChild(modeloEntity);
-    container.appendChild(targetEntity);
-    
-    // Áudio
-    const audioElem = document.getElementById('audioElem');
-    const audioBtn = document.getElementById('audioBtn');
-    let audioPlaying = false;
-    let audioPausedTime = 0;
-    
-    if (projeto.audio) {
-      const audioUrl = `https://capucci.github.io/AR-CapCreator/assets/${projeto.audio.name}`;
-      audioElem.src = audioUrl;
-    }
-    
-    function playAudio() {
-      if (audioElem.src) {
-        if (audioPausedTime > 0) audioElem.currentTime = audioPausedTime;
-        audioElem.play().then(() => {
-          audioPlaying = true;
-          audioBtn.innerHTML = '🔊';
-        }).catch(() => {});
+    projeto.targets.forEach((target, index) => {
+      // Criar entidade para cada target
+      const targetEntity = document.createElement('a-entity');
+      targetEntity.setAttribute('mindar-image-target', `targetIndex: ${index}`);
+      targetEntity.setAttribute('id', `target-${target.id}`);
+      
+      // Adicionar conteúdo baseado no tipo
+      if (target.tipo === 'modelo3d' && target.arquivos.modelo) {
+        const modeloUrl = `https://capucci.github.io/AR-CapCreator/assets/${target.arquivos.modelo}`;
+        const modeloEntity = document.createElement('a-entity');
+        modeloEntity.setAttribute('gltf-model', modeloUrl);
+        modeloEntity.setAttribute('animation-mixer', '');
+        
+        const cfg = target.config || { scale: 100, posY: 0, rotX: -90, rotY: 0 };
+        modeloEntity.setAttribute('scale', `${cfg.scale} ${cfg.scale} ${cfg.scale}`);
+        modeloEntity.setAttribute('position', `0 ${cfg.posY} 0`);
+        modeloEntity.setAttribute('rotation', `${cfg.rotX} ${cfg.rotY} 0`);
+        
+        targetEntity.appendChild(modeloEntity);
       }
-    }
-    
-    function pauseAudio() {
-      if (audioPlaying) {
-        audioPausedTime = audioElem.currentTime;
-        audioElem.pause();
-        audioPlaying = false;
-        audioBtn.innerHTML = '🔇';
+      
+      if (target.tipo === 'video' && target.arquivos.video) {
+        const videoUrl = `https://capucci.github.io/AR-CapCreator/assets/${target.arquivos.video}`;
+        const videoEntity = document.createElement('a-video');
+        videoEntity.setAttribute('src', videoUrl);
+        videoEntity.setAttribute('width', '2');
+        videoEntity.setAttribute('height', '1.5');
+        videoEntity.setAttribute('position', '0 1 0');
+        videoEntity.setAttribute('loop', 'true');
+        targetEntity.appendChild(videoEntity);
       }
-    }
-    
-    // Eventos do target
-    const mindarTarget = document.querySelector('[mindar-image-target]');
-    if (mindarTarget) {
-      mindarTarget.addEventListener('targetFound', () => {
-        document.getElementById('info').innerHTML = '✅ Target encontrado!';
+      
+      if (target.tipo === 'imagem' && target.arquivos.imagem) {
+        const imgUrl = `https://capucci.github.io/AR-CapCreator/assets/${target.arquivos.imagem}`;
+        const imgEntity = document.createElement('a-image');
+        imgEntity.setAttribute('src', imgUrl);
+        imgEntity.setAttribute('width', '2');
+        imgEntity.setAttribute('height', '2');
+        imgEntity.setAttribute('position', '0 1 0');
+        targetEntity.appendChild(imgEntity);
+      }
+      
+      if (target.tipo === 'texto') {
+        const texto = target.config?.texto || 'Texto';
+        const textEntity = document.createElement('a-text');
+        textEntity.setAttribute('value', texto);
+        textEntity.setAttribute('color', 'white');
+        textEntity.setAttribute('align', 'center');
+        textEntity.setAttribute('width', '3');
+        textEntity.setAttribute('position', '0 1 0');
+        targetEntity.appendChild(textEntity);
+      }
+      
+      container.appendChild(targetEntity);
+      
+      // Adicionar evento para mostrar qual target foi encontrado
+      targetEntity.addEventListener('targetFound', () => {
+        document.getElementById('info').innerHTML = `✅ ${target.nome} encontrado!`;
         document.getElementById('info').style.background = 'rgba(40,167,69,0.9)';
-        setTimeout(() => document.getElementById('info').style.opacity = '0', 2000);
-        if (projeto.audio) playAudio();
+        setTimeout(() => document.getElementById('info').style.opacity = '0', 1500);
+        setTimeout(() => document.getElementById('info').style.opacity = '1', 2000);
       });
       
-      mindarTarget.addEventListener('targetLost', () => {
-        document.getElementById('info').innerHTML = '🔍 Aponte para o target';
-        document.getElementById('info').style.background = 'rgba(0,0,0,0.7)';
-        document.getElementById('info').style.opacity = '1';
-        if (projeto.audio) pauseAudio();
+      targetEntity.addEventListener('targetLost', () => {
+        document.getElementById('info').innerHTML = `🔍 ${target.nome} perdido`;
+        document.getElementById('info').style.background = 'rgba(0,0,0,0.8)';
       });
-    }
-    
-    audioBtn.addEventListener('click', () => {
-      if (audioPlaying) pauseAudio();
-      else playAudio();
     });
+    
+    // Configurar o primeiro target como principal (simplificado)
+    if (projeto.targets.length > 0 && projeto.targets[0].arquivos.modelo) {
+      // Para Mind AR, precisamos de um arquivo .mind compilado com todos os targets
+      // Por enquanto, usamos uma URL de exemplo
+      const targetUrl = `https://capucci.github.io/AR-CapCreator/assets/target.mind`;
+      scene.setAttribute('mindar-image', `imageTargetSrc: ${targetUrl}; autoStart: true;`);
+    }
     
     setTimeout(() => {
       document.getElementById('loading').style.opacity = '0';
