@@ -15,41 +15,23 @@
       position: fixed;
       top: 10px;
       left: 10px;
-      background: rgba(0,0,0,0.85);
+      background: rgba(0,0,0,0.8);
       color: white;
       padding: 15px;
       border-radius: 10px;
       z-index: 1000;
-      width: 300px;
+      max-width: 280px;
       font-size: 12px;
       pointer-events: auto;
-      max-height: 95vh;
-      overflow-y: auto;
     }
     .painel button {
       background: #e94560;
       color: white;
       border: none;
-      padding: 10px 12px;
+      padding: 8px 12px;
       margin: 5px;
       border-radius: 5px;
       cursor: pointer;
-      width: calc(100% - 10px);
-    }
-    .painel button:hover {
-      background: #ff6b8b;
-      transform: scale(1.02);
-    }
-    .painel .btn-target {
-      background: #ff9800;
-      font-size: 16px;
-      font-weight: bold;
-    }
-    .painel .btn-salvar {
-      background: #28a745;
-    }
-    .painel .btn-limpar {
-      background: #dc3545;
     }
     .painel input {
       width: 100%;
@@ -71,71 +53,36 @@
       z-index: 1000;
       font-size: 12px;
     }
-    .target-status {
-      background: #333;
-      padding: 8px;
-      border-radius: 5px;
-      margin-bottom: 10px;
-      text-align: center;
-      font-size: 11px;
-    }
-    .target-status.ok {
-      background: #28a745;
-    }
-    hr {
-      margin: 10px 0;
-      border-color: #444;
-    }
   </style>
 </head>
 <body>
   <div class="painel">
-    <h3>🎮 EDITOR AR</h3>
+    <h3>🎮 Editor AR</h3>
     
-    <!-- Status do Target -->
-    <div class="target-status" id="targetStatus">
-      ⚠️ Nenhum target carregado
+    <div>
+      <button id="btnTarget">1️⃣ Carregar Target (.mind)</button>
+      <button id="btnModelo">2️⃣ Adicionar Modelo 3D</button>
+      <button id="btnVideo">3️⃣ Adicionar Vídeo</button>
+      <button id="btnImagem">4️⃣ Adicionar Imagem</button>
+      <button id="btnTexto">5️⃣ Adicionar Texto</button>
+      <button id="btnSalvar" style="background: #28a745;">💾 SALVAR PROJETO</button>
+      <button id="btnLimpar">🗑️ Limpar</button>
     </div>
     
-    <!-- Botão principal para carregar target -->
-    <button class="btn-target" id="btnTarget">🎯 1. CARREGAR TARGET (.mind)</button>
-    <div style="font-size: 10px; color: #aaa; text-align: center; margin-bottom: 15px;">
-      Clique aqui, selecione o arquivo .mind e aponte a câmera
+    <div style="margin-top: 10px; border-top: 1px solid #444; padding-top: 10px;">
+      <div>📐 Ajustes do elemento selecionado:</div>
+      <div>Posição X: <span id="valX">0</span> <input type="range" id="sliderX" min="-3" max="3" step="0.05" value="0" class="slider"></div>
+      <div>Posição Y: <span id="valY">0</span> <input type="range" id="sliderY" min="-2" max="4" step="0.05" value="0" class="slider"></div>
+      <div>Posição Z: <span id="valZ">0</span> <input type="range" id="sliderZ" min="-3" max="3" step="0.05" value="0" class="slider"></div>
+      <div>Escala: <span id="valScale">1</span> <input type="range" id="sliderScale" min="0.1" max="10" step="0.1" value="1" class="slider"></div>
+      <div>Rotação X: <span id="valRotX">0</span> <input type="range" id="sliderRotX" min="-180" max="180" step="5" value="0" class="slider"></div>
+      <div>Rotação Y: <span id="valRotY">0</span> <input type="range" id="sliderRotY" min="-180" max="180" step="5" value="0" class="slider"></div>
     </div>
     
-    <hr>
-    
-    <div style="font-weight: bold; margin-bottom: 5px;">2. ADICIONAR ELEMENTOS:</div>
-    <button id="btnModelo">📦 Adicionar Modelo 3D (.glb)</button>
-    <button id="btnVideo">🎬 Adicionar Vídeo (.mp4)</button>
-    <button id="btnImagem">🖼️ Adicionar Imagem (.png/.jpg)</button>
-    <button id="btnTexto">📝 Adicionar Texto</button>
-    
-    <hr>
-    
-    <div style="font-weight: bold; margin-bottom: 5px;">3. AJUSTES DO ELEMENTO SELECIONADO:</div>
-    <div id="selectedName" style="background: #e94560; padding: 5px; border-radius: 5px; text-align: center; margin-bottom: 10px;">
-      Nenhum elemento selecionado
-    </div>
-    
-    <div>Posição X: <span id="valX">0</span> <input type="range" id="sliderX" min="-3" max="3" step="0.05" value="0" class="slider"></div>
-    <div>Posição Y: <span id="valY">0</span> <input type="range" id="sliderY" min="-2" max="4" step="0.05" value="0" class="slider"></div>
-    <div>Posição Z: <span id="valZ">0</span> <input type="range" id="sliderZ" min="-3" max="3" step="0.05" value="0" class="slider"></div>
-    <div>Escala: <span id="valScale">1</span> <input type="range" id="sliderScale" min="0.1" max="10" step="0.1" value="1" class="slider"></div>
-    <div>Rotação X: <span id="valRotX">0</span> <input type="range" id="sliderRotX" min="-180" max="180" step="5" value="0" class="slider"></div>
-    <div>Rotação Y: <span id="valRotY">0</span> <input type="range" id="sliderRotY" min="-180" max="180" step="5" value="0" class="slider"></div>
-    
-    <hr>
-    
-    <button class="btn-salvar" id="btnSalvar">💾 4. SALVAR PROJETO</button>
-    <button class="btn-limpar" id="btnLimpar">🗑️ Limpar Todos os Elementos</button>
-    
-    <div id="status" style="margin-top: 10px; color: #aaa; font-size: 11px; text-align: center;">
-      ✅ Pronto! Carregue um target para começar.
-    </div>
+    <div id="status" style="margin-top: 10px; color: #aaa; font-size: 11px;">Aguardando...</div>
   </div>
   
-  <div class="info" id="info">🔍 Aguardando target...</div>
+  <div class="info" id="info">🔍 Aponte para o target</div>
   
   <a-scene
     id="scene"
@@ -167,8 +114,6 @@
     const scene = document.getElementById('scene');
     const infoDiv = document.getElementById('info');
     const statusDiv = document.getElementById('status');
-    const targetStatusDiv = document.getElementById('targetStatus');
-    const selectedNameSpan = document.getElementById('selectedName');
     
     // ============================================
     // FUNÇÕES
@@ -179,23 +124,7 @@
       console.log(msg);
     }
     
-    function atualizarTargetStatus(carregado, nome = '') {
-      if (carregado) {
-        targetStatusDiv.innerHTML = `✅ TARGET CARREGADO: ${nome}`;
-        targetStatusDiv.className = 'target-status ok';
-        infoDiv.innerHTML = '✅ Target carregado! Aponte a câmera para a imagem';
-      } else {
-        targetStatusDiv.innerHTML = '⚠️ Nenhum target carregado - Clique no botão laranja acima';
-        targetStatusDiv.className = 'target-status';
-      }
-    }
-    
     function adicionarElemento(tipo, nome, icon, file = null, texto = '') {
-      if (!targetFile) {
-        alert('⚠️ Primeiro carregue o target (.mind)! Clique no botão laranja "CARREGAR TARGET"');
-        return;
-      }
-      
       const id = nextId++;
       
       const elemento = {
@@ -218,7 +147,7 @@
       elementos.push(elemento);
       renderizarCena();
       selecionarElemento(id);
-      atualizarStatus(`✅ ${nome} adicionado! Use os sliders para ajustar.`);
+      atualizarStatus(`✅ ${nome} adicionado!`);
     }
     
     function renderizarCena() {
@@ -230,10 +159,6 @@
         entity.setAttribute('position', `${el.posX} ${el.posY} ${el.posZ}`);
         entity.setAttribute('scale', `${el.scale} ${el.scale} ${el.scale}`);
         entity.setAttribute('rotation', `${el.rotX} ${el.rotY} ${el.rotZ}`);
-        
-        // Adicionar cursor para clicar e selecionar
-        entity.setAttribute('cursor', 'rayOrigin: mouse');
-        entity.setAttribute('raycaster', 'objects: *');
         
         if (el.tipo === 'modelo3d' && el.url) {
           entity.setAttribute('gltf-model', el.url);
@@ -248,12 +173,6 @@
         } else if (el.tipo === 'texto') {
           entity.setAttribute('text', `value: ${el.texto}; color: white; align: center; width: 3`);
         }
-        
-        // Evento de clique para selecionar
-        entity.addEventListener('click', (e) => {
-          e.stopPropagation();
-          selecionarElemento(el.id);
-        });
         
         targetContainer.appendChild(entity);
       });
@@ -279,8 +198,7 @@
       document.getElementById('valRotX').innerText = el.rotX;
       document.getElementById('valRotY').innerText = el.rotY;
       
-      selectedNameSpan.innerHTML = `🔧 ${el.nome}`;
-      atualizarStatus(`Editando: ${el.nome}`);
+      atualizarStatus(`🔧 Editando: ${el.nome}`);
     }
     
     function atualizarElementoSelecionado() {
@@ -301,6 +219,7 @@
       document.getElementById('valRotY').innerText = elementoSelecionado.rotY;
       
       renderizarCena();
+      selecionarElemento(elementoSelecionado.id);
     }
     
     function limparElementos() {
@@ -308,7 +227,6 @@
         elementos = [];
         elementoSelecionado = null;
         renderizarCena();
-        selectedNameSpan.innerHTML = 'Nenhum elemento selecionado';
         atualizarStatus('🗑️ Todos os elementos removidos');
       }
     }
@@ -339,14 +257,11 @@
           targetFile = file;
           const url = URL.createObjectURL(file);
           scene.setAttribute('mindar-image', `imageTargetSrc: ${url}; autoStart: true;`);
-          atualizarTargetStatus(true, file.name);
           atualizarStatus(`🎯 Target carregado: ${file.name}`);
-          infoDiv.innerHTML = '✅ Target carregado! Aponte a câmera para a imagem impressa';
-          
-          // Esconder mensagem após 5 segundos
+          infoDiv.innerHTML = '✅ Target carregado! Aponte a câmera';
           setTimeout(() => {
-            infoDiv.innerHTML = '🔍 Aponte a câmera para o target';
-          }, 5000);
+            infoDiv.innerHTML = '🔍 Aponte para o target';
+          }, 3000);
         }
       };
       input.click();
@@ -357,7 +272,7 @@
     // ============================================
     function salvarProjeto() {
       if (!targetFile) {
-        alert('❌ Primeiro carregue um target (.mind)! Clique no botão laranja "CARREGAR TARGET"');
+        alert('❌ Carregue um target .mind primeiro!');
         return;
       }
       
@@ -389,7 +304,7 @@
       const baseUrl = window.location.origin + window.location.pathname.replace('editor.html', '');
       const projectUrl = `${baseUrl}ver.html?id=${projectId}`;
       
-      alert(`✅ Projeto salvo com sucesso!\n\n🔗 LINK: ${projectUrl}\n\n📋 O link foi copiado para sua área de transferência!\n\nCompartilhe com seu cliente!`);
+      alert(`✅ Projeto salvo!\n\nLink: ${projectUrl}\n\nCopie este link para compartilhar!`);
       navigator.clipboard.writeText(projectUrl);
       
       // Abrir em nova aba
@@ -404,8 +319,8 @@
     document.getElementById('btnVideo').onclick = () => uploadArquivo('video', '.mp4', 'Vídeo', '🎬');
     document.getElementById('btnImagem').onclick = () => uploadArquivo('imagem', '.png,.jpg,.jpeg', 'Imagem', '🖼️');
     document.getElementById('btnTexto').onclick = () => {
-      const texto = prompt('Digite o texto que aparecerá sobre o target:');
-      if (texto && texto.trim()) {
+      const texto = prompt('Digite o texto:');
+      if (texto) {
         adicionarElemento('texto', texto.substring(0, 20), '📝', null, texto);
       }
     };
@@ -420,7 +335,17 @@
     document.getElementById('sliderRotX').oninput = atualizarElementoSelecionado;
     document.getElementById('sliderRotY').oninput = atualizarElementoSelecionado;
     
-    atualizarStatus('✅ Editor carregado! Clique no botão LARANJA para carregar o target.');
+    // Evento de clique nos elementos da cena (para selecionar)
+    function setupClickHandlers() {
+      document.querySelectorAll('[mindar-image-target] a-entity').forEach(el => {
+        el.addEventListener('click', () => {
+          const id = parseInt(el.id.replace('elem-', ''));
+          selecionarElemento(id);
+        });
+      });
+    }
+    
+    atualizarStatus('✅ Editor carregado! Clique em "Carregar Target" para começar.');
   </script>
 </body>
 </html>
