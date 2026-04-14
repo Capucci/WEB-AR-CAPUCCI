@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Criar Projeto AR</title>
+  <title>Criador AR - Múltiplos Targets</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -12,44 +12,95 @@
       min-height: 100vh;
       padding: 20px;
     }
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-    h1, h2 { color: white; text-align: center; margin-bottom: 20px; }
+    .container { max-width: 1400px; margin: 0 auto; }
+    h1 { color: white; text-align: center; margin-bottom: 20px; }
     
-    .card {
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 20px;
+    }
+    
+    .target-card {
       background: white;
-      border-radius: 20px;
-      padding: 25px;
-      margin-bottom: 20px;
+      border-radius: 15px;
+      padding: 20px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .target-header {
+      background: #667eea;
+      color: white;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     
     .upload-area {
       border: 2px dashed #ddd;
       border-radius: 10px;
-      padding: 20px;
+      padding: 15px;
       text-align: center;
       cursor: pointer;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
       transition: all 0.3s;
     }
     .upload-area:hover { border-color: #667eea; background: #f8f9ff; }
     .upload-area.has-file { border-color: #28a745; background: #f0fff0; }
     
-    .file-info { margin-top: 10px; font-size: 12px; color: #666; }
+    .file-info { font-size: 11px; color: #666; margin-top: 5px; word-break: break-all; }
+    
+    .tipo-select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    
+    .config-area {
+      background: #f8f9fa;
+      padding: 10px;
+      border-radius: 10px;
+      margin-top: 10px;
+      display: none;
+    }
+    
+    .config-area.show { display: block; }
     
     .slider-item {
-      margin-bottom: 15px;
+      margin-bottom: 10px;
     }
     .slider-item label {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 5px;
-      font-weight: bold;
+      font-size: 12px;
     }
     input[type=range] { width: 100%; }
+    
+    .btn-remove {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    
+    .btn-add {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+      margin-top: 20px;
+    }
     
     .btn-primary {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -61,190 +112,265 @@
       font-weight: bold;
       cursor: pointer;
       width: 100%;
-    }
-    
-    .preview-box {
-      background: #1a1a2e;
-      border-radius: 10px;
-      padding: 10px;
-      margin-top: 15px;
+      margin-top: 20px;
     }
     
     .result-box {
-      background: #28a745;
-      color: white;
+      background: white;
+      border-radius: 15px;
       padding: 20px;
-      border-radius: 10px;
+      margin-top: 20px;
       display: none;
       text-align: center;
     }
     .result-box.show { display: block; }
     
-    .url { word-break: break-all; background: white; color: #333; padding: 10px; border-radius: 5px; margin: 10px 0; }
+    .url { word-break: break-all; background: #f0f0f0; padding: 10px; border-radius: 5px; margin: 10px 0; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🎯 Criar Projeto AR</h1>
+    <h1>🎯 Criador AR - Múltiplos Targets</h1>
+    <p style="color: white; text-align: center; margin-bottom: 20px;">Configure cada face do seu cubo (ou cada target separado)</p>
     
-    <div class="card">
-      <h2>1. Target (.mind)</h2>
-      <div class="upload-area" id="targetArea" onclick="document.getElementById('targetFile').click()">
-        <div>🎯 Clique para selecionar o arquivo .mind</div>
-        <input type="file" id="targetFile" accept=".mind" style="display: none;">
-        <div class="file-info" id="targetInfo">Nenhum arquivo</div>
-      </div>
-      
-      <h2>2. Modelo 3D (.glb)</h2>
-      <div class="upload-area" id="modeloArea" onclick="document.getElementById('modeloFile').click()">
-        <div>📦 Clique para selecionar o modelo GLB</div>
-        <input type="file" id="modeloFile" accept=".glb,.gltf" style="display: none;">
-        <div class="file-info" id="modeloInfo">Nenhum arquivo</div>
-      </div>
-      
-      <h2>3. Ajustes do Modelo</h2>
-      <div class="slider-item">
-        <label>Escala <span id="scaleVal">100</span></label>
-        <input type="range" id="scale" min="1" max="500" step="10" value="100">
-      </div>
-      <div class="slider-item">
-        <label>Posição Y (altura) <span id="posYVal">0</span></label>
-        <input type="range" id="posY" min="-5" max="5" step="0.1" value="0">
-      </div>
-      <div class="slider-item">
-        <label>Rotação X <span id="rotXVal">-90</span></label>
-        <input type="range" id="rotX" min="-180" max="180" step="5" value="-90">
-      </div>
-      <div class="slider-item">
-        <label>Rotação Y <span id="rotYVal">0</span></label>
-        <input type="range" id="rotY" min="-180" max="180" step="5" value="0">
-      </div>
-      
-      <h2>4. Áudio (opcional)</h2>
-      <div class="upload-area" id="audioArea" onclick="document.getElementById('audioFile').click()">
-        <div>🎵 Clique para selecionar o áudio MP3</div>
-        <input type="file" id="audioFile" accept=".mp3" style="display: none;">
-        <div class="file-info" id="audioInfo">Nenhum arquivo (opcional)</div>
-      </div>
-      
-      <h2>5. Nome do Projeto</h2>
-      <input type="text" id="projectName" placeholder="Nome do projeto" style="width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 5px;">
-      
-      <button class="btn-primary" id="createBtn">🚀 CRIAR PROJETO</button>
-    </div>
+    <div id="targetsContainer" class="grid"></div>
+    
+    <button class="btn-add" id="addTargetBtn">+ Adicionar Nova Face/Target</button>
+    <button class="btn-primary" id="createBtn">🚀 CRIAR PROJETO AR</button>
     
     <div class="result-box" id="resultBox">
-      <h3>✅ PROJETO CRIADO!</h3>
+      <h2 style="color: #28a745;">✅ PROJETO CRIADO!</h2>
       <div class="url" id="projectUrl"></div>
       <div id="qrCode"></div>
-      <button id="copyBtn" style="margin-top: 10px; padding: 10px 20px; background: white; color: #28a745; border: none; border-radius: 5px; cursor: pointer;">📋 Copiar Link</button>
-      <button id="openBtn" style="margin-top: 10px; padding: 10px 20px; background: white; color: #667eea; border: none; border-radius: 5px; cursor: pointer;">👁️ Abrir AR</button>
+      <button id="copyBtn" style="margin-top: 10px; padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px;">📋 Copiar Link</button>
+      <button id="openBtn" style="margin-top: 10px; padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px;">👁️ Abrir AR</button>
     </div>
   </div>
 
   <script>
-    let projectFiles = {
-      target: null,
-      modelo: null,
-      audio: null
-    };
+    let targets = [];
+    let targetCounter = 0;
     
-    // Upload handlers
-    document.getElementById('targetFile').addEventListener('change', (e) => {
-      projectFiles.target = e.target.files[0];
-      document.getElementById('targetInfo').innerHTML = `✅ ${projectFiles.target.name}`;
-      document.getElementById('targetArea').classList.add('has-file');
-    });
+    // Tipos de conteúdo disponíveis
+    const tiposConteudo = [
+      { value: 'modelo3d', label: '📦 Modelo 3D GLB', icon: '📦' },
+      { value: 'video', label: '🎬 Vídeo MP4', icon: '🎬' },
+      { value: 'imagem', label: '🖼️ Imagem PNG/JPG', icon: '🖼️' },
+      { value: 'texto', label: '📝 Texto Informativo', icon: '📝' },
+      { value: 'audio', label: '🎵 Áudio MP3', icon: '🎵' }
+    ];
     
-    document.getElementById('modeloFile').addEventListener('change', (e) => {
-      projectFiles.modelo = e.target.files[0];
-      document.getElementById('modeloInfo').innerHTML = `✅ ${projectFiles.modelo.name}`;
-      document.getElementById('modeloArea').classList.add('has-file');
-    });
-    
-    document.getElementById('audioFile').addEventListener('change', (e) => {
-      projectFiles.audio = e.target.files[0];
-      document.getElementById('audioInfo').innerHTML = `✅ ${projectFiles.audio.name}`;
-      document.getElementById('audioArea').classList.add('has-file');
-    });
-    
-    // Sliders
-    const scaleSlider = document.getElementById('scale');
-    const posYSlider = document.getElementById('posY');
-    const rotXSlider = document.getElementById('rotX');
-    const rotYSlider = document.getElementById('rotY');
-    
-    function updateValues() {
-      document.getElementById('scaleVal').textContent = scaleSlider.value;
-      document.getElementById('posYVal').textContent = posYSlider.value;
-      document.getElementById('rotXVal').textContent = rotXSlider.value;
-      document.getElementById('rotYVal').textContent = rotYSlider.value;
+    function addTarget() {
+      const id = targetCounter++;
+      targets.push({
+        id: id,
+        nome: `Face ${targets.length + 1}`,
+        tipo: 'modelo3d',
+        arquivos: {},
+        config: {
+          scale: 100,
+          posX: 0,
+          posY: 0,
+          posZ: 0,
+          rotX: -90,
+          rotY: 0,
+          rotZ: 0
+        }
+      });
+      renderTargets();
     }
     
-    scaleSlider.addEventListener('input', updateValues);
-    posYSlider.addEventListener('input', updateValues);
-    rotXSlider.addEventListener('input', updateValues);
-    rotYSlider.addEventListener('input', updateValues);
+    function removeTarget(id) {
+      targets = targets.filter(t => t.id !== id);
+      renderTargets();
+    }
     
-    // Criar projeto
+    function updateTargetTipo(id, tipo) {
+      const target = targets.find(t => t.id === id);
+      if (target) {
+        target.tipo = tipo;
+        renderTargets();
+      }
+    }
+    
+    function updateTargetFile(id, field, file) {
+      const target = targets.find(t => t.id === id);
+      if (target) {
+        target.arquivos[field] = file;
+        renderTargets();
+      }
+    }
+    
+    function updateTargetConfig(id, field, value) {
+      const target = targets.find(t => t.id === id);
+      if (target) {
+        target.config[field] = parseFloat(value);
+        renderTargets();
+      }
+    }
+    
+    function updateTargetNome(id, nome) {
+      const target = targets.find(t => t.id === id);
+      if (target) {
+        target.nome = nome;
+        renderTargets();
+      }
+    }
+    
+    function renderTargets() {
+      const container = document.getElementById('targetsContainer');
+      container.innerHTML = targets.map(target => `
+        <div class="target-card">
+          <div class="target-header">
+            <input type="text" value="${target.nome}" 
+                   onchange="updateTargetNome(${target.id}, this.value)" 
+                   style="background: transparent; border: none; color: white; font-weight: bold; font-size: 16px;">
+            <button class="btn-remove" onclick="removeTarget(${target.id})">🗑️</button>
+          </div>
+          
+          <div>
+            <label>Tipo de Conteúdo</label>
+            <select class="tipo-select" onchange="updateTargetTipo(${target.id}, this.value)">
+              ${tiposConteudo.map(t => `<option value="${t.value}" ${target.tipo === t.value ? 'selected' : ''}>${t.icon} ${t.label}</option>`).join('')}
+            </select>
+          </div>
+          
+          ${target.tipo === 'modelo3d' ? `
+            <div class="upload-area" onclick="document.getElementById('file-modelo-${target.id}').click()">
+              <div>📦 Upload do Modelo GLB</div>
+              <input type="file" id="file-modelo-${target.id}" accept=".glb,.gltf" style="display: none;" 
+                     onchange="updateTargetFile(${target.id}, 'modelo', this.files[0])">
+              <div class="file-info">${target.arquivos.modelo ? `✅ ${target.arquivos.modelo.name}` : 'Nenhum arquivo'}</div>
+            </div>
+            
+            <div class="config-area show">
+              <div class="slider-item">
+                <label>Escala <span>${target.config.scale}</span></label>
+                <input type="range" min="1" max="500" step="10" value="${target.config.scale}" 
+                       oninput="updateTargetConfig(${target.id}, 'scale', this.value)">
+              </div>
+              <div class="slider-item">
+                <label>Posição Y (altura) <span>${target.config.posY}</span></label>
+                <input type="range" min="-5" max="5" step="0.1" value="${target.config.posY}" 
+                       oninput="updateTargetConfig(${target.id}, 'posY', this.value)">
+              </div>
+              <div class="slider-item">
+                <label>Rotação X <span>${target.config.rotX}</span></label>
+                <input type="range" min="-180" max="180" step="5" value="${target.config.rotX}" 
+                       oninput="updateTargetConfig(${target.id}, 'rotX', this.value)">
+              </div>
+            </div>
+          ` : ''}
+          
+          ${target.tipo === 'video' ? `
+            <div class="upload-area" onclick="document.getElementById('file-video-${target.id}').click()">
+              <div>🎬 Upload do Vídeo MP4</div>
+              <input type="file" id="file-video-${target.id}" accept=".mp4" style="display: none;" 
+                     onchange="updateTargetFile(${target.id}, 'video', this.files[0])">
+              <div class="file-info">${target.arquivos.video ? `✅ ${target.arquivos.video.name}` : 'Nenhum arquivo'}</div>
+            </div>
+          ` : ''}
+          
+          ${target.tipo === 'imagem' ? `
+            <div class="upload-area" onclick="document.getElementById('file-imagem-${target.id}').click()">
+              <div>🖼️ Upload da Imagem PNG/JPG</div>
+              <input type="file" id="file-imagem-${target.id}" accept=".png,.jpg,.jpeg" style="display: none;" 
+                     onchange="updateTargetFile(${target.id}, 'imagem', this.files[0])">
+              <div class="file-info">${target.arquivos.imagem ? `✅ ${target.arquivos.imagem.name}` : 'Nenhum arquivo'}</div>
+            </div>
+          ` : ''}
+          
+          ${target.tipo === 'texto' ? `
+            <div>
+              <textarea placeholder="Digite o texto que aparecerá..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-top: 10px;" 
+                        rows="3" onchange="updateTargetConfig(${target.id}, 'texto', this.value)">${target.config.texto || ''}</textarea>
+            </div>
+          ` : ''}
+          
+          ${target.tipo === 'audio' ? `
+            <div class="upload-area" onclick="document.getElementById('file-audio-${target.id}').click()">
+              <div>🎵 Upload do Áudio MP3</div>
+              <input type="file" id="file-audio-${target.id}" accept=".mp3" style="display: none;" 
+                     onchange="updateTargetFile(${target.id}, 'audio', this.files[0])">
+              <div class="file-info">${target.arquivos.audio ? `✅ ${target.arquivos.audio.name}` : 'Nenhum arquivo'}</div>
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+    }
+    
+    document.getElementById('addTargetBtn').addEventListener('click', addTarget);
+    
     document.getElementById('createBtn').addEventListener('click', () => {
-      if (!projectFiles.target) {
-        alert('❌ Selecione o arquivo .mind do target!');
+      if (targets.length === 0) {
+        alert('❌ Adicione pelo menos um target!');
         return;
       }
-      if (!projectFiles.modelo) {
-        alert('❌ Selecione o modelo 3D .glb!');
-        return;
+      
+      // Validar cada target
+      for (const target of targets) {
+        if (target.tipo === 'modelo3d' && !target.arquivos.modelo) {
+          alert(`❌ Target "${target.nome}" não tem modelo 3D!`);
+          return;
+        }
+        if (target.tipo === 'video' && !target.arquivos.video) {
+          alert(`❌ Target "${target.nome}" não tem vídeo!`);
+          return;
+        }
+        if (target.tipo === 'imagem' && !target.arquivos.imagem) {
+          alert(`❌ Target "${target.nome}" não tem imagem!`);
+          return;
+        }
+        if (target.tipo === 'audio' && !target.arquivos.audio) {
+          alert(`❌ Target "${target.nome}" não tem áudio!`);
+          return;
+        }
       }
       
       const projectId = Date.now().toString(36) + Math.random().toString(36).substr(2);
-      const projectName = document.getElementById('projectName').value || 'Meu Projeto AR';
       
       const projeto = {
         id: projectId,
-        nome: projectName,
+        nome: 'Projeto Multi-Target',
         data: new Date().toISOString(),
-        target: { name: projectFiles.target.name },
-        modelo: { name: projectFiles.modelo.name },
-        audio: projectFiles.audio ? { name: projectFiles.audio.name } : null,
-        config: {
-          scale: scaleSlider.value,
-          posY: posYSlider.value,
-          rotX: rotXSlider.value,
-          rotY: rotYSlider.value
-        }
+        targets: targets.map(t => ({
+          id: t.id,
+          nome: t.nome,
+          tipo: t.tipo,
+          arquivos: {
+            modelo: t.arquivos.modelo?.name,
+            video: t.arquivos.video?.name,
+            imagem: t.arquivos.imagem?.name,
+            audio: t.arquivos.audio?.name
+          },
+          config: t.config
+        }))
       };
       
-      // Salvar
       const projetos = JSON.parse(localStorage.getItem('ar_projetos') || '[]');
       projetos.push(projeto);
       localStorage.setItem('ar_projetos', JSON.stringify(projetos));
       
-      // Gerar URL
       const baseUrl = window.location.origin + window.location.pathname.replace('criar.html', '');
       const projectUrl = `${baseUrl}ver.html?id=${projectId}`;
       
-      // Mostrar resultado
       document.getElementById('projectUrl').innerHTML = projectUrl;
-      const qrUrl = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(projectUrl)}&choe=UTF-8`;
-      document.getElementById('qrCode').innerHTML = `<img src="${qrUrl}" style="margin-top: 10px;">`;
+      const qrUrl = `https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=${encodeURIComponent(projectUrl)}&choe=UTF-8`;
+      document.getElementById('qrCode').innerHTML = `<img src="${qrUrl}">`;
       document.getElementById('resultBox').classList.add('show');
-      
-      // Rolagem
-      document.getElementById('resultBox').scrollIntoView({ behavior: 'smooth' });
     });
     
     document.getElementById('copyBtn').addEventListener('click', () => {
-      const url = document.getElementById('projectUrl').textContent;
-      navigator.clipboard.writeText(url).then(() => alert('✅ Link copiado!'));
+      navigator.clipboard.writeText(document.getElementById('projectUrl').textContent);
+      alert('✅ Link copiado!');
     });
     
     document.getElementById('openBtn').addEventListener('click', () => {
-      const url = document.getElementById('projectUrl').textContent;
-      window.open(url, '_blank');
+      window.open(document.getElementById('projectUrl').textContent, '_blank');
     });
     
-    updateValues();
+    // Adicionar primeiro target automaticamente
+    addTarget();
   </script>
 </body>
 </html>
